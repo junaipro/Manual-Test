@@ -1,0 +1,2050 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이수페타시스 전자증빙 FD 매뉴얼</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --navy: #0f1e3c;
+    --navy2: #1a2f57;
+    --blue: #1e4db7;
+    --blue-light: #2563eb;
+    --accent: #3b82f6;
+    --accent2: #60a5fa;
+    --bg: #f0f4f8;
+    --bg2: #e8eef5;
+    --white: #ffffff;
+    --text: #1e293b;
+    --text2: #475569;
+    --text3: #94a3b8;
+    --border: #cbd5e1;
+    --border2: #e2e8f0;
+    --green: #059669;
+    --green-bg: #ecfdf5;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --yellow: #d97706;
+    --yellow-bg: #fffbeb;
+    --purple: #7c3aed;
+    --purple-bg: #f5f3ff;
+    --sidebar-w: 280px;
+    --header-h: 52px;
+    --shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+  /* ── TOP HEADER ── */
+  .top-header {
+    height: var(--header-h);
+    background: var(--navy);
+    display: flex; align-items: center; padding: 0 20px;
+    gap: 12px; flex-shrink: 0; z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25);
+  }
+  .top-header .logo {
+    display: flex; align-items: center; gap: 10px;
+    color: white; font-weight: 700; font-size: 15px; letter-spacing: -.3px;
+  }
+  .top-header .logo-icon {
+    width: 30px; height: 30px; background: var(--blue-light);
+    border-radius: 7px; display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+  .top-header .subtitle { color: #94a3b8; font-size: 12px; font-weight: 400; margin-left: 4px; }
+  .top-header .spacer { flex: 1; }
+  .top-header .badge {
+    background: rgba(255,255,255,.1); color: #cbd5e1; font-size: 11px;
+    padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,.15);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── BODY LAYOUT ── */
+  .body-wrap { display: flex; flex: 1; overflow: hidden; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar-w); background: var(--navy2);
+    display: flex; flex-direction: column; flex-shrink: 0;
+    overflow: hidden; transition: width .25s ease;
+  }
+  .sidebar.collapsed { width: 0; }
+
+  .sidebar-head {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .sidebar-head h3 { color: #cbd5e1; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+
+  .sidebar-add-btn {
+    background: var(--blue-light); color: white; border: none; cursor: pointer;
+    font-size: 11px; padding: 4px 10px; border-radius: 5px; font-family: inherit;
+    font-weight: 500; display: flex; align-items: center; gap: 4px;
+    transition: background .15s;
+  }
+  .sidebar-add-btn:hover { background: var(--blue); }
+
+  .sidebar-scroll { flex: 1; overflow-y: auto; padding: 8px 0; }
+  .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+  .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 2px; }
+
+  .menu-group { margin-bottom: 4px; }
+  .menu-group-label {
+    color: #64748b; font-size: 10px; font-weight: 600; letter-spacing: .08em;
+    text-transform: uppercase; padding: 8px 16px 4px;
+    cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+    user-select: none; transition: color .15s;
+  }
+  .menu-group-label:hover { color: #94a3b8; }
+  .menu-group-label .arrow { font-size: 9px; transition: transform .2s; margin-right: 6px; }
+  .menu-group.collapsed .arrow { transform: rotate(-90deg); }
+  .menu-group-items { overflow: hidden; max-height: 500px; transition: max-height .25s ease; }
+  .menu-group.collapsed .menu-group-items { max-height: 0; }
+  .menu-item-icon:empty { display: none; }
+  .menu-item.sub-item { padding-left: 24px; }
+
+  .menu-item {
+    display: flex; align-items: center;
+    padding: 0 8px 0 12px; height: 36px;
+    cursor: pointer; border-radius: 6px; margin: 1px 8px;
+    transition: all .15s; position: relative; gap: 8px;
+  }
+  .menu-item:hover { background: rgba(255,255,255,.07); }
+  .menu-item.active { background: var(--blue-light); }
+  .menu-item.active .menu-item-icon { color: white; }
+  .menu-item.active .menu-item-label { color: white; font-weight: 600; }
+
+  .menu-item-icon { font-size: 13px; width: 18px; text-align: center; flex-shrink: 0; color: #64748b; transition: color .15s; }
+  .menu-item-label { color: #94a3b8; font-size: 13px; flex: 1; transition: color .15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .menu-item:hover .menu-item-label { color: #cbd5e1; }
+  .menu-item:hover .menu-item-icon { color: #94a3b8; }
+
+  .menu-item-actions {
+    display: none; align-items: center; gap: 2px;
+  }
+  .menu-item:hover .menu-item-actions { display: flex; }
+  .menu-item.active .menu-item-actions { display: flex; }
+
+  .mact-btn {
+    background: rgba(255,255,255,.1); border: none; color: #94a3b8;
+    width: 22px; height: 22px; border-radius: 4px; cursor: pointer;
+    font-size: 11px; display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+  }
+  .mact-btn:hover { background: rgba(255,255,255,.2); color: white; }
+  .mact-btn.del:hover { background: rgba(220,38,38,.3); color: #fca5a5; }
+
+  /* inline edit */
+  .menu-item input.edit-input {
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+    color: white; font-family: inherit; font-size: 13px;
+    width: 100%; padding: 2px 6px; border-radius: 4px; outline: none;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .main-toolbar {
+    height: 42px; background: white; border-bottom: 1px solid var(--border2);
+    display: flex; align-items: center; padding: 0 20px; gap: 10px;
+    flex-shrink: 0; box-shadow: var(--shadow);
+  }
+  .toggle-sidebar-btn {
+    background: none; border: 1px solid var(--border); color: var(--text2);
+    width: 30px; height: 30px; border-radius: 6px; cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center; transition: all .15s;
+  }
+  .toggle-sidebar-btn:hover { background: var(--bg2); color: var(--text); }
+  .breadcrumb { color: var(--text3); font-size: 12px; display: flex; align-items: center; gap: 6px; }
+  .breadcrumb .sep { color: var(--border); }
+  .breadcrumb .current { color: var(--text2); font-weight: 500; }
+
+  .main-content { flex: 1; overflow-y: auto; padding: 24px 28px; }
+  .main-content::-webkit-scrollbar { width: 6px; }
+  .main-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── WELCOME PAGE ── */
+  .welcome-page { max-width: 800px; margin: 0 auto; padding: 20px 0; }
+  .welcome-hero {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+    border-radius: 16px; padding: 40px; color: white; margin-bottom: 24px;
+    position: relative; overflow: hidden;
+  }
+  .welcome-hero::before {
+    content: ''; position: absolute; top: -40px; right: -40px;
+    width: 200px; height: 200px; background: rgba(255,255,255,.05);
+    border-radius: 50%;
+  }
+  .welcome-hero h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+  .welcome-hero p { color: rgba(255,255,255,.7); font-size: 14px; line-height: 1.7; }
+  .welcome-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-top: 24px; }
+  .stat-card { background: rgba(255,255,255,.1); border-radius: 10px; padding: 16px; text-align: center; }
+  .stat-card .num { font-size: 28px; font-weight: 700; }
+  .stat-card .lbl { font-size: 11px; color: rgba(255,255,255,.6); margin-top: 2px; }
+  .welcome-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; }
+  .welcome-card {
+    background: white; border-radius: 12px; padding: 20px;
+    border: 1px solid var(--border2); cursor: pointer;
+    transition: all .2s; box-shadow: var(--shadow);
+  }
+  .welcome-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); border-color: var(--accent); }
+  .welcome-card .icon { font-size: 22px; margin-bottom: 10px; }
+  .welcome-card h4 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .welcome-card p { font-size: 12px; color: var(--text3); line-height: 1.6; }
+  .welcome-card .arrow { color: var(--accent); font-size: 14px; margin-top: 10px; font-weight: 600; }
+
+  /* ── FD PAGE ── */
+  .fd-page { max-width: 960px; margin: 0 auto; }
+
+  .fd-header-card {
+    background: white; border-radius: 12px; padding: 24px 28px;
+    border: 1px solid var(--border2); box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .fd-prog-title {
+    display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px;
+  }
+  .fd-prog-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--blue) 0%, var(--accent2) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .fd-prog-info h1 { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .fd-prog-info .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag {
+    font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 3px;
+  }
+  .tag-blue { background: #eff6ff; color: var(--blue-light); }
+  .tag-green { background: var(--green-bg); color: var(--green); }
+  .tag-gray { background: var(--bg2); color: var(--text2); }
+  .tag-purple { background: var(--purple-bg); color: var(--purple); }
+
+  .fd-meta-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 0; border: 1px solid var(--border2); border-radius: 8px; overflow: hidden; }
+  .fd-meta-item { padding: 12px 14px; background: var(--bg); }
+  .fd-meta-item:not(:last-child) { border-right: 1px solid var(--border2); }
+  .fd-meta-item .lbl { font-size: 10px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 3px; }
+  .fd-meta-item .val { font-size: 13px; font-weight: 500; color: var(--text); }
+
+  /* ── SECTION CARD ── */
+  .section-card {
+    background: white; border-radius: 12px; border: 1px solid var(--border2);
+    box-shadow: var(--shadow); margin-bottom: 16px; overflow: hidden;
+  }
+  .section-header {
+    padding: 14px 20px; border-bottom: 1px solid var(--border2);
+    display: flex; align-items: center; gap: 10px; cursor: pointer;
+    user-select: none; transition: background .15s;
+  }
+  .section-header:hover { background: var(--bg); }
+  .section-header .sec-icon {
+    width: 28px; height: 28px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0;
+  }
+  .sec-blue { background: #eff6ff; }
+  .sec-green { background: var(--green-bg); }
+  .sec-yellow { background: var(--yellow-bg); }
+  .sec-purple { background: var(--purple-bg); }
+  .sec-red { background: var(--red-bg); }
+  .section-header h2 { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+  .section-header .count { font-size: 11px; color: var(--text3); background: var(--bg2); padding: 2px 8px; border-radius: 10px; font-family: 'JetBrains Mono', monospace; }
+  .section-header .chevron { color: var(--text3); font-size: 12px; transition: transform .2s; }
+  .section-header.open .chevron { transform: rotate(90deg); }
+  .section-body { padding: 0; display: none; }
+  .section-body.open { display: block; }
+
+  /* overview */
+  .overview-text { padding: 16px 20px; font-size: 13px; line-height: 1.8; color: var(--text2); border-left: 3px solid var(--accent); margin: 16px 20px; border-radius: 0 6px 6px 0; background: #f8faff; }
+
+  /* ── TABLE ── */
+  .fd-table-wrap { overflow-x: auto; }
+  .fd-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .fd-table thead th {
+    background: var(--navy); color: white; padding: 10px 14px;
+    text-align: left; font-weight: 600; font-size: 11px; letter-spacing: .04em;
+    white-space: nowrap; border-right: 1px solid rgba(255,255,255,.1);
+  }
+  .fd-table thead th:last-child { border-right: none; }
+  .fd-table tbody tr { border-bottom: 1px solid var(--border2); transition: background .1s; }
+  .fd-table tbody tr:last-child { border-bottom: none; }
+  .fd-table tbody tr:hover { background: #f8faff; }
+  .fd-table tbody tr:nth-child(even) { background: var(--bg); }
+  .fd-table tbody tr:nth-child(even):hover { background: #f0f4fb; }
+  .fd-table td { padding: 9px 14px; vertical-align: top; color: var(--text2); border-right: 1px solid var(--border2); }
+  .fd-table td:last-child { border-right: none; }
+  .fd-table .field-name { font-weight: 600; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .fd-table .field-desc { max-width: 340px; white-space: pre-wrap; line-height: 1.6; }
+  .req-badge { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+  .req-필수 { background: #fef2f2; color: #dc2626; }
+  .req-선택 { background: #f0fdf4; color: #16a34a; }
+  .req-display { background: #eff6ff; color: #2563eb; }
+  .req-default { background: var(--bg2); color: var(--text3); }
+  .field-len { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); }
+
+  /* ── LOGIC LIST ── */
+  .logic-list { padding: 16px 20px; }
+  .logic-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px 12px; border-radius: 6px; margin-bottom: 4px;
+    font-size: 12.5px; line-height: 1.7; color: var(--text2);
+    border-left: 2px solid transparent;
+  }
+  .logic-item.section-head {
+    background: var(--navy); color: white; border-radius: 6px;
+    font-weight: 600; font-size: 12px; border-left: none; margin-top: 8px;
+    padding: 8px 14px;
+  }
+  .logic-item.subsection {
+    background: #eff6ff; border-left-color: var(--accent);
+    color: var(--blue); font-weight: 500;
+  }
+  .logic-item.code-block {
+    background: #0f172a; color: #7dd3fc;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    white-space: pre-wrap; border-radius: 8px; margin: 8px 0;
+    border-left: 3px solid var(--accent); line-height: 1.6;
+  }
+  .logic-item.normal { background: var(--bg); border-left-color: var(--border); }
+  .logic-item.normal:hover { background: var(--bg2); border-left-color: var(--accent); }
+
+  /* ── HISTORY TABLE ── */
+  .history-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .history-table th {
+    background: #1e293b; color: white; padding: 9px 14px;
+    text-align: left; font-weight: 600; font-size: 11px;
+  }
+  .history-table td { padding: 9px 14px; border-bottom: 1px solid var(--border2); color: var(--text2); }
+  .history-table tr:last-child td { border-bottom: none; }
+  .history-table tr:hover td { background: var(--bg); }
+
+  /* ── EXTRA SECTIONS ── */
+  .extra-section-wrap { padding: 4px 0; }
+  .extra-toolbar { display: flex; gap: 8px; margin-bottom: 12px; }
+  .extra-edit-btn, .extra-save-btn {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 5px 14px; border-radius: 6px; font-size: 12px;
+    font-weight: 600; cursor: pointer; border: none; transition: all .15s;
+  }
+  .extra-edit-btn { background: #f1f5f9; color: #475569; }
+  .extra-edit-btn:hover { background: #e2e8f0; }
+  .extra-save-btn { background: #3b82f6; color: white; }
+  .extra-save-btn:hover { background: #2563eb; }
+  .extra-upload-area {
+    border: 2px dashed #e2e8f0; border-radius: 8px; padding: 32px;
+    text-align: center; cursor: pointer; color: #94a3b8; font-size: 14px;
+    transition: border-color .15s; margin-bottom: 12px;
+  }
+  .extra-upload-area:hover { border-color: #3b82f6; color: #3b82f6; }
+  .extra-text {
+    font-size: 13px; color: #334155; line-height: 1.8;
+    white-space: pre-wrap; min-height: 40px;
+  }
+
+  .screen-img-wrap {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    resize: both;
+    overflow: auto;
+    min-width: 200px;
+    min-height: 100px;
+    max-width: 100%;
+    width: fit-content;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    position: relative;
+  }
+  .screen-img-wrap::after {
+    content: '↔';
+    position: absolute;
+    bottom: 6px;
+    right: 8px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.35);
+    pointer-events: none;
+    user-select: none;
+  }
+  .screen-img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+    display: block;
+  }
+  .editable-cell {
+    cursor: default;
+    pointer-events: none;
+  }
+  .editable-cell:hover { background: none; }
+  .editable-cell .empty-desc { color: #cbd5e1; font-style: italic; font-size: 12px; }
+  .editable-cell input {
+    width: 100%; box-sizing: border-box;
+    border: 2px solid #3b82f6; border-radius: 4px;
+    padding: 4px 8px; font-size: 13px; outline: none;
+    font-family: inherit; background: #fff;
+  }
+
+  /* ── END EXTRA ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.5);
+    display: flex; align-items: center; justify-content: center; z-index: 999;
+    display: none;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white; border-radius: 14px; padding: 28px;
+    width: 400px; box-shadow: var(--shadow-lg);
+  }
+  .modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .modal p { font-size: 12px; color: var(--text3); margin-bottom: 18px; }
+  .modal label { font-size: 12px; font-weight: 600; color: var(--text2); display: block; margin-bottom: 5px; }
+  .modal input, .modal select {
+    width: 100%; padding: 9px 12px; border: 1px solid var(--border);
+    border-radius: 7px; font-family: inherit; font-size: 13px; color: var(--text);
+    outline: none; transition: border-color .15s; margin-bottom: 14px;
+  }
+  .modal input:focus, .modal select:focus { border-color: var(--accent); }
+  .modal-btns { display: flex; justify-content: flex-end; gap: 8px; }
+  .btn { padding: 8px 18px; border-radius: 7px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all .15s; }
+  .btn-cancel { background: var(--bg2); color: var(--text2); }
+  .btn-cancel:hover { background: var(--border); }
+  .btn-primary { background: var(--blue-light); color: white; }
+  .btn-primary:hover { background: var(--blue); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text3); }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  /* ── SCROLLBAR ── */
+  .main-content::-webkit-scrollbar-track { background: transparent; }
+
+  /* ── RESIZE HANDLE ── */
+  .resize-handle {
+    width: 4px; background: transparent; cursor: col-resize; flex-shrink: 0;
+    transition: background .15s;
+  }
+  .resize-handle:hover { background: var(--accent); }
+
+  @media (max-width: 768px) {
+    .sidebar { position: fixed; top: var(--header-h); left: 0; bottom: 0; z-index: 50; }
+    .welcome-stats { grid-template-columns: repeat(3,1fr); }
+    .welcome-grid { grid-template-columns: 1fr; }
+    .fd-meta-grid { grid-template-columns: repeat(2,1fr); }
+    .fd-meta-item:nth-child(2) { border-right: none; }
+    .fd-meta-item:nth-child(3) { border-top: 1px solid var(--border2); }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP HEADER -->
+<header class="top-header">
+  <div class="logo">
+    <div class="logo-icon">📋</div>
+    <span>이수페타시스 전자증빙</span>
+    <span class="subtitle">FD 매뉴얼</span>
+  </div>
+  <div class="spacer"></div>
+  <div class="badge">v2.3 · 2026.03</div>
+</header>
+
+<div class="body-wrap">
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <h3>메뉴 구성</h3>
+      <button class="sidebar-add-btn" onclick="openAddModal()">＋ 추가</button>
+    </div>
+    <div class="sidebar-scroll" id="sidebarScroll">
+      <!-- menu items injected by JS -->
+    </div>
+  </nav>
+
+  <div class="resize-handle" id="resizeHandle"></div>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="main-toolbar">
+      <button class="toggle-sidebar-btn" onclick="toggleSidebar()" title="사이드바 토글">☰</button>
+      <div class="breadcrumb">
+        <span>전자증빙 FD</span>
+        <span class="sep">›</span>
+        <span class="current" id="breadcrumbCurrent">홈</span>
+      </div>
+    </div>
+    <div class="main-content" id="mainContent">
+      <!-- content injected by JS -->
+    </div>
+  </main>
+</div>
+
+<!-- ADD MENU MODAL -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <h3>📁 메뉴 추가</h3>
+    <p>새로운 메뉴 항목을 추가합니다. 사용자 정의 메뉴를 만들어 관리하세요.</p>
+    <label>메뉴 그룹</label>
+    <select id="newMenuGroup">
+      <option value="시스템 관리">시스템 관리</option>
+      <option value="매입전표 관리">매입전표 관리</option>
+      <option value="결재 관리">결재 관리</option>
+      <option value="사용자 정의">사용자 정의</option>
+    </select>
+    <label>메뉴명</label>
+    <input type="text" id="newMenuName" placeholder="예: 신규 화면명" />
+    <label>아이콘 (이모지)</label>
+    <input type="text" id="newMenuIcon" placeholder="예: 📄" maxlength="2" />
+    <div class="modal-btns">
+      <button class="btn btn-cancel" onclick="closeAddModal()">취소</button>
+      <button class="btn btn-primary" onclick="addMenuItem()">추가</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ──────────────────────────────────────────────
+// DATA
+// ──────────────────────────────────────────────
+const FD_DATA = {
+  '계정분류': {
+    icon: '📂',
+    group: '시스템 관리',
+    overview: '전자증빙 시스템의 전표 화면에서 회계계정코드 선택이 용이하도록 사전에 정의하는 화면',
+    history: [
+      {ver:'1.0', date:'2026.04.09', desc:'신규작성', author:'최준영'},
+      {ver:'1.1', date:'2026.04.09', desc:'계정구분/대계정 분리 구조 반영', author:'최준영'},
+    ],
+    input_params: [
+      {name:'회사코드', desc:"기본값 : 'P1'\nXXEAC_ACC_CLASS1.COMP_CODE", req:'Display only', len:'char(2)'},
+      {name:'회사명', desc:'Value Set = ISU_PT_COMP, Value = P1', req:'Display only', len:''},
+      {name:'운영단위', desc:"기본값 : 'ISU_PT_OU'\nXXEAC_ACC_CLASS1.ORG_NAME", req:'Display only', len:'char(10)'},
+      {name:'계정구분명', desc:'Text Key in\nXXEAC_ACC_CLASS1.ACC_CLASS1_NAME', req:'선택', len:'char(50)'},
+    ],
+    field_desc: [
+      {name:'계정구분', desc:'Key in\nXXEAC_ACC_CLASS1.ACC_CLASS1_NO', req:'필수', len:'char(3)'},
+      {name:'계정구분명', desc:'Key in\nXXEAC_ACC_CLASS1.ACC_CLASS1_NAME', req:'필수', len:''},
+      {name:'Enabled', desc:"기본값 : Check ('Y')\nXXEAC_ACC_CLASS1.ENABLED_FLAG", req:'선택', len:''},
+      {name:'대계정', desc:'Key in\nXXEAC_ACC_CLASS2.ACC_CLASS2_NO', req:'필수', len:'char(2)'},
+      {name:'대계정명', desc:'Key in\nXXEAC_ACC_CLASS2.ACC_CLASS2_NAME', req:'필수', len:''},
+      {name:'계정코드', desc:'Popup\nXXEAC_ACC_CLASS2.ACCOUNT_CODE', req:'필수', len:''},
+      {name:'계정명', desc:'Display only', req:'Display only', len:''},
+      {name:'Enabled', desc:"기본값 : Check ('Y')\nXXEAC_ACC_CLASS2.ENABLED_FLAG", req:'선택', len:''},
+    ],
+    logic: [
+      {type:'head', text:'■ 조회 : 조회 조건에 대한 데이터 조회'},
+      {type:'normal', text:'□ 전자증빙 회계계정 분류 Table로 부터 데이터 조회 : XXEAC_ACC_CLASS1, XXEAC_ACC_CLASS2'},
+      {type:'head', text:'■ 저장 : Table 저장'},
+      {type:'normal', text:'□ XXEAC_ACC_CLASS1, XXEAC_ACC_CLASS2 Table로 데이터 저장'},
+    ]
+  },
+  '사용자관리': {
+    icon: '👤',
+    group: '시스템 관리',
+    overview: '전자증빙 시스템의 사용자 등록 및 관련 정보를 관리하기 위한 화면. 데이터 조회 권한 관리, 동일한 부서내의 사원들은 데이터를 공유할 수 있도록 관리',
+    history: [
+      {ver:'1.0', date:'2026.04.09', desc:'신규작성', author:'최준영'},
+      {ver:'1.1', date:'2026.04.09', desc:'부서별 세금계산서 메일 관리 탭 추가', author:'최준영'},
+    ],
+    input_params: [
+      {name:'회사코드', desc:"기본값 : 'P1'", req:'Display only', len:'char(2)'},
+      {name:'회사명', desc:'Value Set = ISU_PT_COMP, Value = P1', req:'Display only', len:''},
+      {name:'운영단위', desc:"기본값 : 'ISU_PT_OU'", req:'Display only', len:'char(10)'},
+      {name:'사용자Id', desc:'key In', req:'선택', len:'char(6)'},
+      {name:'사용자명', desc:'key In', req:'선택', len:'char(30)'},
+      {name:'부서', desc:'Popup', req:'선택', len:'char(6)'},
+      {name:'부서명', desc:'부서코드 명칭', req:'Display only', len:'char(30)'},
+      {name:'권한', desc:"Popup\nLookup Type = 'ISU_EAC_RESP'", req:'선택', len:'char(1)'},
+      {name:'□ 효력 종료건 조회', desc:'Check시 시스템일자 기준으로 유효시작일~종료일을 벗어난 데이터 조회', req:'선택', len:'Check Box'},
+    ],
+    field_desc: [
+      {name:'사용자관리 Tab', desc:'전자증빙 로그인Id, 소속정보(전표 기본값), 전표생성 ERP User Id 관리', req:'', len:''},
+      {name:'회사코드', desc:"기본값 : 'P1'\nXXEAC_USERS.COMP_CODE", req:'필수', len:''},
+      {name:'운영단위', desc:"기본값 : 'ISU_PT_OU'\nXXEAC_USERS.ORG_NAME", req:'필수', len:''},
+      {name:'사용자Id', desc:'key In, Unique key\nXXEAC_USERS.USER_ID', req:'필수', len:''},
+      {name:'암호', desc:'key In\nXXEAC_USERS.PASSWORD', req:'필수', len:''},
+      {name:'사번', desc:'key In\nXXEAC_USERS.EMP_NUM', req:'필수', len:''},
+      {name:'사용자명', desc:'key In or 사용자Id 의 사용자명 Display\nXXEAC_USERS.USER_NAME', req:'필수', len:''},
+      {name:'권한', desc:'Popup\nXXEAC_USERS.AUTHORITY_LEVEL', req:'필수', len:'char(1)'},
+      {name:'부서', desc:'Popup\nXXEAC_USERS.DEPT_CODE', req:'필수', len:''},
+      {name:'Oracle ERP ID', desc:'key In\nXXEAC_USERS.ERP_USER_ID', req:'선택', len:''},
+      {name:'유효시작일', desc:'Calendar\nXXEAC_USERS.EFFECTIVE_FROM_DATE', req:'선택', len:'YYYY-MM-DD'},
+      {name:'유효종료일', desc:'Calendar\nXXEAC_USERS.EFFECTIVE_TO_DATE', req:'선택', len:'YYYY-MM-DD'},
+    ],
+    logic: [
+      {type:'head', text:'■ 조회 : 조회 조건에 대한 데이터 조회'},
+      {type:'normal', text:'□ [사용자관리] Tab에 해당하는 Table로 부터 데이터 조회 : XXEAC_USERS'},
+      {type:'normal', text:'□ [부서별 ERP ID] Tab에 해당하는 Table로 부터 데이터 조회 : XXEAC_DEPT_ERPID'},
+      {type:'normal', text:'□ [부서별 세금계산서 메일 관리] Tab에 해당하는 Table로 부터 데이터 조회 : XXEAC_DEPT_EMAIL'},
+      {type:'head', text:'■ 저장 : Table 저장'},
+      {type:'normal', text:'□ 각 Tab에 해당하는 Table로 데이터 저장'},
+    ]
+  },
+  '프로그램관리': {
+    icon: '⚙️',
+    group: '시스템 관리',
+    overview: '사용자 프로그램을 전자증빙 시스템 메뉴에 정의하기 위한 프로그램 등록 화면',
+    history: [
+      {ver:'1.0', date:'2026.04.09', desc:'신규작성', author:'최준영'},
+      {ver:'1.1', date:'2026.04.09', desc:'시작일/종료일 필드 추가', author:'최준영'},
+    ],
+    input_params: [
+      {name:'메뉴명', desc:'Text Key in\nXXEAC_PROGRAM.NAME', req:'선택', len:'char(50)'},
+    ],
+    field_desc: [
+      {name:'상위메뉴', desc:'Text Key in\nXXEAC_PROGRAM.PARENT_MENU', req:'필수', len:'char(30)'},
+      {name:'하위메뉴', desc:'Text Key in\nXXEAC_PROGRAM.CHILD_MENU', req:'필수', len:'char(30)'},
+      {name:'메뉴 명', desc:'Text Key in\nXXEAC_PROGRAM.MENU_NAME', req:'필수', len:'char(50)'},
+      {name:'순서', desc:'Text Key in\nXXEAC_PROGRAM.DISP_ORDER', req:'필수', len:'number'},
+      {name:'메뉴구분', desc:'LIST\nXXEAC_PROGRAM.MENU_TYPE', req:'필수', len:'char(10)'},
+      {name:'시작일', desc:'Text Key in\nXXEAC_PROGRAM.EFFECTIVE_FROM_DATE', req:'필수', len:'date'},
+      {name:'종료일', desc:'Text Key in\nXXEAC_PROGRAM.EFFECTIVE_TO_DATE', req:'필수', len:'date'},
+    ],
+    logic: [
+      {type:'head', text:'■ 조회 : 조회 조건에 대한 데이터 조회'},
+      {type:'normal', text:'□ 프로그램관리 Table로 부터 데이터 조회 : XXEAC_PROGRAM'},
+      {type:'head', text:'■ 저장 : Table 저장'},
+      {type:'normal', text:'□ XXEAC_PROGRAM Table로 데이터 저장'},
+    ]
+  },
+  '결재요청': {
+    icon: '✅',
+    group: '결재 관리',
+    overview: 'ERP에 생성된 전표를 결재요청하는 화면이며, 결재는 그룹웨어에서 진행할 수 있도록 결재문서를 그룹웨어로 전달한다.',
+    history: [
+      {ver:'1.0', date:'2026.04.09', desc:'신규작성', author:'최준영'},
+      {ver:'2.0', date:'2026.04.09', desc:'그룹웨어 연계 로직 추가 및 전표취소 기능 추가', author:'최준영'},
+    ],
+    input_params: [
+      {name:'전표구분', desc:"Popup\nLookup Type = 'ISU_EAC_SLIP_TYPE'", req:'선택', len:''},
+      {name:'증빙구분', desc:"Popup\nLookup Type = 'ISU_EAC_EVID'", req:'선택', len:''},
+      {name:'사번', desc:'기본값 : 로그인 유저의 사번\n사용자 권한이 관리자(1) or 재경팀(2)인 경우는 사번없이 조회 가능', req:'선택', len:'char(6)'},
+      {name:'사원명', desc:'로그인 유저의 사원명', req:'선택', len:'char(30)'},
+      {name:'GL일자 (From~To)', desc:'Calendar\n기본값 : From = 현재월 직전월 1일, To = System Date', req:'필수', len:'YYYY-MM-DD'},
+      {name:'전표번호', desc:'Key in', req:'선택', len:''},
+      {name:'그룹번호', desc:'Key in', req:'선택', len:'Number(14)'},
+    ],
+    field_desc: [
+      {name:'□ (체크박스)', desc:'선택 check box, Check 된 데이터의 그룹생성, 그룹취소, 결재요청, 전표취소를 수행', req:'선택', len:''},
+      {name:'증빙추가', desc:'증빙첨부', req:'Display only', len:''},
+      {name:'증빙조회', desc:'증빙열람', req:'Display only', len:''},
+      {name:'그룹번호', desc:'그룹생성 버튼 실행후 그룹번호 Display', req:'Display only', len:'Number(14)'},
+      {name:'전표구분', desc:"Lookup Type = 'ISU_EAC_SLIP_TYPE'\n매입송장/매출송장/지급/수금/…", req:'Display only', len:''},
+      {name:'증빙구분', desc:"Lookup Type = 'ISU_EAC_EVID'\n법인카드/매입전자세금계산서/매입실물영수증/…", req:'Display only', len:''},
+      {name:'전표번호', desc:'AP Invoice Number / AR Transaction Number\n클릭시 전표양식 Display', req:'Display only', len:''},
+      {name:'전표상태', desc:'ERP전표 상태 (검증됨, 검증필요, …)', req:'Display only', len:''},
+      {name:'거래처명', desc:'', req:'Display only', len:''},
+      {name:'GL일자', desc:'', req:'Display only', len:'YYYY-MM-DD'},
+      {name:'통화', desc:'AP/AR 전표 통화코드', req:'Display only', len:'char(3)'},
+      {name:'총금액', desc:'AP Invoice 금액, AR Transaction 금액', req:'Display only', len:'Number(10)'},
+      {name:'공급가액', desc:'AP Invoice Line의 Item 금액합계', req:'Display only', len:'Number(10)'},
+      {name:'세액', desc:'AP Invoice Line의 Tax 금액합계', req:'Display only', len:'Number(10)'},
+      {name:'내용', desc:'AP Invoice Description', req:'Display only', len:''},
+      {name:'부서', desc:'AP Invoice Line의 첫번째 Item 항목의 COA 부서코드', req:'Display only', len:'char(6)'},
+      {name:'부서명', desc:'부서코드 명칭', req:'Display only', len:'char(30)'},
+    ],
+    logic: [
+      {type:'head', text:'■ 공통'},
+      {type:'normal', text:'□ 결재요청 이후의 데이터는 모든 기능 불가'},
+      {type:'head', text:'■ 조회'},
+      {type:'normal', text:'□ 로그인 유저와 동일한 부서에서 입력한 ERP 전표만 조회'},
+      {type:'normal', text:'□ 로그인 유저가 운영자(1) or 재경팀(2)이면 모든 전표 조회 가능'},
+      {type:'normal', text:'□ 결재반려된(APPR=R) 전표는 그룹번호를 화면에서 안보이게 하여 그룹생성을 다시 하도록 한다'},
+      {type:'head', text:'■ 그룹생성'},
+      {type:'normal', text:'□ 이미 그룹생성된 건은 그룹생성 불가, Message처리'},
+      {type:'normal', text:'□ 복수건 선택 가능'},
+      {type:'normal', text:'□ 그룹생성 번호는 YYYYMMDD||serial number'},
+      {type:'head', text:'■ 결재요청'},
+      {type:'normal', text:'□ 복수건 선택 가능'},
+      {type:'normal', text:'□ 그룹생성 없이 결재요청시 자동 그룹생성후 GW로 결재요청'},
+      {type:'head', text:'■ GW결재'},
+      {type:'normal', text:'□ GW에서 현업결재 완료시 매입송장에 대해서는 ERP AP Invoice를 Approve하는 API를 수행 (Status = REDRAFT)'},
+      {type:'normal', text:'□ GW에서 재경결재 완료(최종 결재)시 AP Invoice Create Accounting API 수행 (Status = COMPLETE)'},
+      {type:'normal', text:'□ GW 결재 과정에서 반려가 되면 결재요청자에게 메일 전송'},
+      {type:'head', text:'■ 전표취소'},
+      {type:'normal', text:"□ 전표원천 = 'ERS' or 'MES' 는 전표취소 불가"},
+      {type:'normal', text:'□ 전표 취소는 결재요청 前과 반려건에 대해서만 가능'},
+      {type:'normal', text:'□ 1건만 선택 가능'},
+      {type:'code', text:"GW 결재요청 URL:\n개발서버: https://gwt.isu.co.kr/cm/ISUWorkflow/ISU_OutInterface/api/approval/forms/request/v2\n운영서버: https://gw.isu.co.kr/cm/ISUWorkflow/ISU_OutInterface/api/approval/forms/request/v2\n\n전표승인 결재 API:\nxxeac_approve_pkg.approve_action(\n  x_retcode => :x_retcode,\n  x_retmesg => :x_retmesg,\n  p_action_user => :p_action_user,\n  p_group_num => :p_group_num,\n  p_doc_id => :p_doc_id,\n  p_status => :p_status,\n  p_approval_date => :p_approval_date\n);"},
+    ]
+  },
+  '결재조회': {
+    icon: '🔍',
+    group: '결재 관리',
+    overview: '결재요청한 ERP전표의 결재 진행 상태를 확인하기 위한 조회 화면',
+    history: [
+      {ver:'1.0', date:'2026.04.09', desc:'신규작성', author:'최준영'},
+    ],
+    input_params: [
+      {name:'전표구분', desc:"Popup\n매입송장/매출송장/지급/수금/…", req:'선택', len:''},
+      {name:'증빙구분', desc:"Popup\n법인카드/매입전자세금계산서/…", req:'선택', len:''},
+      {name:'사번', desc:'기본값 : 로그인 유저의 사번', req:'선택', len:'char(6)'},
+      {name:'사원명', desc:'로그인 유저의 사원명', req:'Display only', len:'char(30)'},
+      {name:'GL일자 (From~To)', desc:'Calendar\n기본값 : From = 현재월 직전월 1일, To = System Date', req:'필수', len:'YYYY-MM-DD'},
+      {name:'결재상태', desc:"Popup\nLookup Type = 'ISU_EAC_STATUS'", req:'선택', len:''},
+      {name:'전표번호', desc:'Text Key In', req:'선택', len:''},
+    ],
+    field_desc: [
+      {name:'[전표취소] 버튼', desc:'□ 회계팀만 가능 (회계팀이 아니면 버튼 비활성화)\n□ 최종 결재된 (회계 생성된) 전표에 대해서만 취소 가능', req:'버튼', len:''},
+      {name:'선택', desc:'□ check box, 전표취소 대상 선택 (1건만 선택 가능)', req:'선택', len:''},
+      {name:'증빙조회', desc:'증빙열람 Popup', req:'버튼', len:''},
+      {name:'그룹번호', desc:'', req:'Display Only', len:''},
+      {name:'전표구분', desc:"Lookup Type = 'ISU_EAC_SLIP_TYPE'", req:'Display Only', len:''},
+      {name:'증빙구분', desc:"Lookup Type = 'ISU_EAC_EVID'", req:'Display Only', len:''},
+      {name:'결재상태', desc:"Lookup Type = 'ISU_EAC_STATUS'", req:'Display Only', len:''},
+      {name:'전표번호', desc:'클릭시 전표양식 Display', req:'Display Only', len:''},
+      {name:'회계생성', desc:'회계생성 상태 (Yes / No / Partial)', req:'Display Only', len:''},
+      {name:'거래처명', desc:'Supplier Name, Customer Name', req:'Display Only', len:''},
+      {name:'GL일자', desc:'', req:'Display Only', len:'YYYY-MM-DD'},
+      {name:'거래금액', desc:'발생금액', req:'Display Only', len:''},
+      {name:'원화금액', desc:'원화 환산금액', req:'Display Only', len:''},
+      {name:'내용', desc:'적요', req:'Display Only', len:''},
+      {name:'부서', desc:'AP Invoice이면 Invoice Line의 첫번째 Item 항목의 COA 부서코드', req:'Display Only', len:''},
+      {name:'결재문서Id', desc:'GW 결재문서 ID\n결재문서Id 클릭시 G/W결재문서 양식 Display', req:'Display Only', len:''},
+    ],
+    logic: [
+      {type:'head', text:'■ 조회'},
+      {type:'normal', text:'□ [사용자관리]에 설정된 사용자별 권한에 맞는 데이터 조회 범위 적용'},
+      {type:'normal', text:'□ 로그인 유저와 동일한 부서에서 (혹은 동일한 부서 인원이) 입력한 내역을 조회'},
+      {type:'head', text:'■ 전표취소'},
+      {type:'normal', text:"□ AP 전표원천 = 'ERS' or 'MES' 전표는 취소 불가"},
+      {type:'normal', text:'□ 전표취소전에 Validation 수행 (전표에 해당하는 모듈의 Period 체크)'},
+      {type:'normal', text:'□ 취소된 전표는 자동 회계생성 실행 (회계생성 Program 호출)'},
+    ]
+  },
+  '매입전자세금계산서': {
+    icon: '🧾',
+    group: '매입전표 관리',
+    overview: '국세청으로 부터 수신한 매입전자세금계산서 내역과 ERP에 생성된 매입채무 전표를 매핑하는 기능과, ERP에 생성된 전표가 없는 경우에는 매입전자세금계산서 내역을 근거로 매입채무 전표를 생성하는 화면이다.',
+    history: [
+      {ver:'1.0', date:'2026.04.09', desc:'신규작성', author:'최준영'},
+      {ver:'1.1', date:'2026.04.09', desc:'자동 매핑 Batch 로직 추가, 신규전표 작성 화면 보완', author:'최준영'},
+    ],
+    input_params: [
+      {name:'작성일자 (From~To)', desc:'Calendar\n기본값 : From = 현재월 직전월 1일, To = System Date', req:'필수', len:'YYYY-MM-DD'},
+      {name:'사번', desc:'기본값 : 로그인 유저의 사번', req:'선택', len:'char(6)'},
+      {name:'사원명', desc:'로그인 유저의 사원명', req:'Display only', len:'char(30)'},
+      {name:'세금계산서 공급자명', desc:'Popup, 매입전자세금계산서 수신 Table에 수신된 데이터의 공급자명', req:'선택', len:''},
+      {name:'사업자번호', desc:'', req:'Display only', len:''},
+      {name:'공급받는자 사업장', desc:'List Box', req:'선택', len:''},
+      {name:'매핑상태', desc:"List Box, '임의'/'확정'", req:'선택', len:''},
+    ],
+    field_desc: [
+      {name:'[매핑 확정] 버튼', desc:'□ 복수개 매핑확정 가능\n□ 전자세금계산서 수신 Table Update - 매핑상태 = 확정(C)', req:'버튼', len:''},
+      {name:'[매핑 취소] 버튼', desc:'□ 복수개 매핑취소 가능\n□ AP Invoice DFF Update - 전자세금계산서 승인번호/일련번호 = null\n□ 전자세금계산서 수신 Table Update - Invoice_Id/Num = null, 매핑상태 = null', req:'버튼', len:''},
+      {name:'[신규 전표 작성] 버튼', desc:'□ 1건만 선택 가능하며, ERP AP 송장 내역에 Data가 없을 때 가능\n□ [매입전자세금계산서 전표등록] 화면으로 이동', req:'버튼', len:''},
+      {name:'매핑상태', desc:"'임의' : Batch Program에 의해 자동 매핑\n'확정' : 사용자에 의해 최종 매핑 확정", req:'Display only', len:''},
+      {name:'작성일자', desc:'매입전자세금계산서 발행일자', req:'Display only', len:'YYYY-MM-DD'},
+      {name:'공급자명', desc:'매입전자세금계산서 공급자명', req:'Display only', len:''},
+      {name:'공급가액', desc:'매입전자세금계산서 공급가액', req:'Display only', len:''},
+      {name:'세액', desc:'매입전자세금계산서 세액', req:'Display only', len:''},
+      {name:'합계', desc:'매입전자세금계산서 합계', req:'Display only', len:''},
+      {name:'승인번호', desc:'매입전자세금계산서 승인번호', req:'Display only', len:''},
+      {name:'일련번호', desc:'매입전자세금계산서 일련번호', req:'Display only', len:''},
+    ],
+    logic: [
+      {type:'head', text:'■ 전표 매핑'},
+      {type:'code', text:"XXEAC_ETAX_BILL_AP_PKG.INVOICE_MAPPING_LINK(\n  x_retcode => :x_retcode,\n  x_retmesg => :x_retmesg,\n  p_eac_user => :p_eac_user,\n  p_etax_bill_seq => :p_etax_bill_seq,\n  p_org_id => :p_org_id,\n  p_invoice_id => :p_invoice_id\n);"},
+      {type:'head', text:'■ 전표 매핑 취소'},
+      {type:'code', text:"XXEAC_ETAX_BILL_AP_PKG.INVOICE_MAPPING_CANCEL(\n  x_retcode => :x_retcode,\n  x_retmesg => :x_retmesg,\n  p_eac_user => :p_eac_user,\n  p_etax_bill_seq => :p_etax_bill_seq,\n  p_org_id => :p_org_id\n);"},
+      {type:'head', text:'■ 전표 매핑 확정'},
+      {type:'code', text:"XXEAC_ETAX_BILL_AP_PKG.INVOICE_MAPPING_CONFIRM(\n  x_retcode => :x_retcode,\n  x_retmesg => :x_retmesg,\n  p_eac_user => :p_eac_user,\n  p_etax_bill_seq => :p_etax_bill_seq,\n  p_org_id => :p_org_id\n);"},
+      {type:'head', text:'■ 신규전표 저장 후 AP 생성'},
+      {type:'code', text:"XXEAC_AP_INTERFACE_PKG.MAIN(\n  x_retcode => :x_retcode,\n  x_retmesg => :x_retmesg,\n  p_eac_user => :p_eac_user,\n  p_eac_invoice_seq => :p_eac_invoice_seq\n);"},
+    ]
+  },
+  '법인카드전표등록': {
+    icon: '💳',
+    group: '매입전표 관리',
+    overview: '카드사로 부터 수신한 법인카드 사용내역을 전표처리하는 화면',
+    history: [
+      {ver:'1.0', date:'2026.04.09', desc:'신규작성', author:'최준영'},
+      {ver:'2.0', date:'2026.04.09', desc:'세부내역 입력 블록 추가', author:'최준영'},
+      {ver:'2.3', date:'2026.04.09', desc:'수기처리/개인비용처리/카드취소 기능 추가', author:'최준영'},
+    ],
+    input_params: [
+      {name:'카드번호', desc:'Popup, 로그인 유저와 동일한 부서의 사원이 소유하고 있는 모든 카드번호', req:'선택', len:'char(16)'},
+      {name:'승인일자 (From~To)', desc:'Calendar\n기본값 : From = 현재월 직전월 1일, To = System Date', req:'필수', len:'YYYY-MM-DD'},
+      {name:'사번', desc:'기본값 : 로그인 유저의 사번', req:'선택', len:'char(6)'},
+      {name:'사원명', desc:'로그인 유저의 사원명', req:'선택', len:'char(30)'},
+    ],
+    field_desc: [
+      {name:'승인/취소 구분', desc:"카드사용 승인 혹은 취소 구분 ==> 정상('A') / 취소('B')\nXXEAC_CARD_USE.CLASS1", req:'Display only', len:'char(6)'},
+      {name:'승인(취소)일자', desc:'카드사용 승인일자 혹은 취소일자\nXXEAC_CARD_USE.APPRDATE', req:'Display only', len:'YYYY-MM-DD'},
+      {name:'가맹점명', desc:'카드사용 가맹점명\nXXEAC_CARD_USE.MERCHNAME', req:'Display only', len:'char(30)'},
+      {name:'통화', desc:"기본값: 'KRW'", req:'Display only', len:'char(3)'},
+      {name:'공급가액', desc:'카드사용 공급가액\nXXEAC_CARD_USE.APPRAMT1', req:'Display only', len:'Number(10)'},
+      {name:'세액', desc:'카드사용 세액\nXXEAC_CARD_USE.VAT1', req:'Display only', len:'Number(10)'},
+      {name:'봉사료', desc:'카드사용 봉사료\nXXEAC_CARD_USE.TIPS', req:'Display only', len:'Number(10)'},
+      {name:'합계', desc:'카드사용 합계액 (공급가액 + 세액 + 봉사료)\nXXEAC_CARD_USE.PURCHTOT', req:'Display only', len:'Number(10)'},
+      {name:'계정구분', desc:'Popup, 계정 Alias, 비용항목 block의 기본값\nXXEAC_AP_INVOICES.ACC_CLASS1_NAME', req:'선택', len:'char(30)'},
+      {name:'대계정', desc:'Popup, 계정구분의 세분류\nXXEAC_AP_INVOICES.ACC_CLASS2_NAME', req:'선택', len:'char(20)'},
+      {name:'내용', desc:'Key In, 전표 적요\nXXEAC_AP_INVOICES.DESCRIPTION', req:'필수', len:'char(30)'},
+      {name:'부서', desc:'Popup, COA 부서 Segment Value\n기본값 = 로그인 사용자의 부서코드', req:'필수', len:'char(6)'},
+      {name:'계정', desc:'Popup, COA 계정 Segment Value', req:'필수', len:'char(9)'},
+      {name:'활동', desc:'Popup, COA 활동 Segment Value', req:'필수', len:'char(6)'},
+      {name:'세금코드', desc:'Popup (부가세코드/설명/세율)', req:'과세업체 필수', len:'char(20)'},
+      {name:'전표유형[ ]', desc:'List Box, DFF Context Field Value\n기본값 = 기타', req:'선택', len:'char(12)'},
+      {name:'예산잔액', desc:'클릭시 별도 팝업창에서 정보 제공\nSummary Account에 의한 예산 통제 (분기)', req:'Display only', len:''},
+    ],
+    logic: [
+      {type:'head', text:'■ 공통'},
+      {type:'normal', text:'□ 결재요청 이후의 데이터는 임시저장/전표생성/세부내역작성/수기처리/개인비용처리/카드취소 불가'},
+      {type:'normal', text:'□ 반려 전표는 재 작업 가능'},
+      {type:'head', text:'■ 임시저장'},
+      {type:'normal', text:'□ 1건만 선택 가능'},
+      {type:'normal', text:'□ 임시저장 Procedure 호출'},
+      {type:'head', text:'■ 전표생성'},
+      {type:'normal', text:'□ 복수건 선택 가능'},
+      {type:'normal', text:'□ Validation: Cross Validation Rule 검증, 예산잔액 검증, AP Period 검증'},
+      {type:'head', text:'■ 수기처리'},
+      {type:'normal', text:"□ 카드사용내역 Table Update ('S' --> XXEAC_CARD_USE.APPR)"},
+      {type:'head', text:'■ 개인비용처리'},
+      {type:'normal', text:"□ 카드사용내역 Table Update ('P' --> XXEAC_CARD_USE.APPR)"},
+      {type:'head', text:'■ 카드취소'},
+      {type:'normal', text:"□ 카드사용내역 Table Update ('C' --> XXEAC_CARD_USE.APPR)"},
+      {type:'code', text:"-- 상태변경 API (수기처리/개인비용처리/카드취소)\nxxeac_card_use_pkg.update_appr_flag(\n  x_retcode => :x_retcode,\n  x_retmesg => :x_retmesg,\n  p_user_id => :p_user_id,\n  p_eac_invoice_seq => :p_eac_invoice_seq,\n  p_appr_flag => :p_appr_flag  -- 'S'/'P'/'C'\n);\n\n-- AP 전표 생성 API\nXXEAC_AP_INTERFACE_PKG.MAIN(\n  x_retcode => :x_retcode,\n  x_retmesg => :x_retmesg,\n  p_eac_user => :p_eac_user,\n  p_eac_invoice_seq => :p_eac_invoice_seq\n);"},
+    ]
+  },
+  '실물증빙전표등록': {
+    icon: '🧾',
+    group: '매입전표 관리',
+    overview: '법인카드, 전자매입세금계산서, 수입명세서 증빙 외에 실물영수증에 대한 매입채무 전표를 등록하는 화면이다.',
+    history: [
+      {ver:'1.0', date:'2026.04.09', desc:'신규작성', author:'최준영'},
+    ],
+    input_params: [
+      {name:'송장일자 (From~To)', desc:'Calendar\n기본값 : From = 현재월 직전월 1일, To = System Date', req:'필수', len:'YYYY-MM-DD'},
+      {name:'사번', desc:'기본값 : 로그인 유저의 사번', req:'선택', len:'char(6)'},
+      {name:'사원명', desc:'로그인 유저의 사원명', req:'Display only', len:'char(30)'},
+      {name:'공급자명', desc:'Popup, ERP Supplier 정보', req:'선택', len:''},
+      {name:'지점', desc:'Popup, ERP Supplier site 정보', req:'선택', len:''},
+    ],
+    field_desc: [
+      {name:'[임시저장] 버튼', desc:'□ 증빙은 1건 이상 추가되어야 저장 가능\n□ 임시Table로 저장', req:'버튼', len:''},
+      {name:'[전표생성] 버튼', desc:'□ Validation: 차액 <> 0 이면 저장 불가\n□ Cross Validation Rule 검증\n□ 예산잔액 검증, AP Period 검증', req:'버튼', len:''},
+      {name:'증빙유형', desc:"Popup\nValue Set = 'ISU_EVIDENCE_TYPE'", req:'필수', len:''},
+      {name:'운영단위', desc:'로그인 사용자의 소속 OU', req:'Display Only', len:''},
+      {name:'사업장', desc:'List Box, AP Invoice DFF (Attribute2)', req:'필수', len:''},
+      {name:'유형', desc:"List Box, Invoice Type ('표준', '대변 메모')\n기본값 = '표준'", req:'필수', len:''},
+      {name:'공급자명', desc:'Popup, ERP Supplier Name', req:'필수', len:''},
+      {name:'지점명', desc:'Popup, ERP Supplier Site Code', req:'필수', len:''},
+      {name:'송장일자', desc:'Calendar', req:'필수', len:'YYYY-MM-DD'},
+      {name:'GL일자', desc:'Calendar, 기본값 = 송장일자', req:'필수', len:'YYYY-MM-DD'},
+      {name:'통화', desc:"Popup, 기본값 = 'KRW'", req:'필수', len:''},
+      {name:'송장금액', desc:'Manual Entry', req:'필수', len:''},
+      {name:'내용', desc:'Text Manual Entry', req:'필수', len:''},
+      {name:'부채계정', desc:'Popup, 기본값 = Supplier Site에 지정된 부채계정', req:'필수', len:''},
+      {name:'지급조건', desc:'Popup, Payment Term', req:'필수', len:''},
+      {name:'부서', desc:'Popup, COA 부서 Segment Value', req:'필수', len:'char(6)'},
+      {name:'계정', desc:'Popup, COA 계정 Segment Value', req:'필수', len:'char(9)'},
+      {name:'활동', desc:'Popup, COA 활동 Segment Value', req:'필수', len:'char(6)'},
+      {name:'예산잔액', desc:'클릭시 별도 팝업창에서 정보 제공 (분기 통제)', req:'Display only', len:''},
+    ],
+    logic: [
+      {type:'head', text:'■ 임시저장'},
+      {type:'normal', text:'□ 증빙은 1건 이상 추가되어야 저장 가능'},
+      {type:'normal', text:'□ 임시Table로 저장하는 Procedure 호출'},
+      {type:'head', text:'■ 전표생성'},
+      {type:'normal', text:'□ 차액 <> 0 이면 저장 불가 (차변과 대변 금액이 동일해야 합니다)'},
+      {type:'normal', text:'□ GL 설정의 Cross Validation Rule 검증'},
+      {type:'normal', text:'□ 예산잔액 검증'},
+      {type:'normal', text:'□ AP Period 검증'},
+      {type:'normal', text:'□ 임시 Table의 데이터를 AP Invoice로 생성 (전표생성 API Procedure 호출)'},
+      {type:'code', text:"-- 데이터 조회 (헤더/공급자정보)\nSELECT *\nFROM   XXEAC_AP_INVOICE_HEADERS_V H\nWHERE  H.ORG_ID = 85\n  AND  H.SOURCE = 'APOTHER'  -- 실물증빙\n  AND  H.AP_SEND_YN <> 'Y'  -- AP송장 생성여부\n  AND  H.INVOICE_DATE BETWEEN :송장일자_FROM AND :송장일자_TO;\n\n-- 라인/비용항목 조회\nSELECT line_number, line_type, line_amount, gl_date,\n       line_descr, tax_code, dept_code, account_code, activity_code\nFROM   xxeac_ap_invoice_lines_v\nWHERE  org_id = 85\n  AND  eac_invoice_seq = :eac_invoice_seq\nORDER BY line_number;"},
+    ]
+  }
+,
+  '법인카드승인내역수신': {
+    icon: '📥',
+    group: '컨커넌트',
+    overview: '법인카드 승인내역을 외부 시스템(컨커넌트)으로부터 수신하여 전자증빙 시스템에 반영하는 배치 프로그램',
+    history: [
+      {ver:'1.0', date:'2026.04.09', desc:'신규작성', author:'최준영'},
+    ],
+    input_params: [],
+    field_desc: [
+      {name:'CARD_USE_SEQ',       desc:'', req:'필수', len:'NUMBER'},
+      {name:'CLASS1',             desc:'', req:'필수', len:'VARCHAR2(1)'},
+      {name:'CARDNO',             desc:'', req:'필수', len:'VARCHAR2(25)'},
+      {name:'APPRNO',             desc:'', req:'필수', len:'VARCHAR2(12)'},
+      {name:'COLLNO',             desc:'', req:'선택', len:'VARCHAR2(32)'},
+      {name:'DATACODE',           desc:'', req:'선택', len:'VARCHAR2(1)'},
+      {name:'COMPANYID',          desc:'', req:'선택', len:'VARCHAR2(20)'},
+      {name:'SENDDATE',           desc:'', req:'선택', len:'DATE'},
+      {name:'SEQNO',              desc:'', req:'선택', len:'VARCHAR2(8)'},
+      {name:'READFLAG',           desc:'', req:'선택', len:'VARCHAR2(1)'},
+      {name:'ORGNCOLLNO',         desc:'', req:'선택', len:'VARCHAR2(32)'},
+      {name:'SLIPNO',             desc:'', req:'선택', len:'VARCHAR2(12)'},
+      {name:'APPRDATE',           desc:'', req:'선택', len:'DATE'},
+      {name:'APPRTIME',           desc:'', req:'선택', len:'VARCHAR2(8)'},
+      {name:'PURCHDATE',          desc:'', req:'선택', len:'DATE'},
+      {name:'CURRCODE',           desc:'', req:'선택', len:'VARCHAR2(5)'},
+      {name:'APPRTOT',            desc:'', req:'선택', len:'NUMBER'},
+      {name:'ACQUTOT',            desc:'', req:'선택', len:'NUMBER'},
+      {name:'ACQUEXCH',           desc:'', req:'선택', len:'NUMBER'},
+      {name:'USDACQUTOT',         desc:'', req:'선택', len:'NUMBER'},
+      {name:'CONVFEE',            desc:'', req:'선택', len:'NUMBER'},
+      {name:'PURCHTOT',           desc:'', req:'선택', len:'NUMBER'},
+      {name:'INSTTYPE',           desc:'', req:'선택', len:'VARCHAR2(1)'},
+      {name:'SETTDATE',           desc:'', req:'선택', len:'DATE'},
+      {name:'CARD_DATA_SEQ',      desc:'', req:'선택', len:'NUMBER'},
+      {name:'ABROAD',             desc:'', req:'선택', len:'VARCHAR2(1)'},
+      {name:'PURCHYN',            desc:'', req:'선택', len:'VARCHAR2(1)'},
+      {name:'MERCHBIZNO',         desc:'', req:'선택', len:'VARCHAR2(10)'},
+      {name:'MERCHNO',            desc:'', req:'선택', len:'VARCHAR2(12)'},
+      {name:'MERCHNAME',          desc:'', req:'선택', len:'VARCHAR2(100)'},
+      {name:'MASTER1',            desc:'', req:'선택', len:'VARCHAR2(100)'},
+      {name:'MERCHTEL',           desc:'', req:'선택', len:'VARCHAR2(14)'},
+      {name:'MERCHZIPCODE',       desc:'', req:'선택', len:'VARCHAR2(6)'},
+      {name:'MERCHADDR1',         desc:'', req:'선택', len:'VARCHAR2(200)'},
+      {name:'MERCHADDR2',         desc:'', req:'선택', len:'VARCHAR2(200)'},
+      {name:'MCCNAME',            desc:'', req:'선택', len:'VARCHAR2(100)'},
+      {name:'MCCCODE',            desc:'', req:'선택', len:'VARCHAR2(4)'},
+      {name:'PARTACQUCANCYN',     desc:'', req:'선택', len:'VARCHAR2(1)'},
+      {name:'NONEAPPRYN',         desc:'', req:'선택', len:'VARCHAR2(1)'},
+      {name:'SERVTYPEYN',         desc:'', req:'선택', len:'VARCHAR2(1)'},
+      {name:'DISCAMT',            desc:'', req:'선택', len:'NUMBER'},
+      {name:'CURRACQUTOT',        desc:'', req:'선택', len:'NUMBER'},
+      {name:'ACQUFEE',            desc:'', req:'선택', len:'NUMBER'},
+      {name:'APPRAMT',            desc:'', req:'선택', len:'NUMBER'},
+      {name:'VAT',                desc:'', req:'선택', len:'NUMBER'},
+      {name:'TIPS',               desc:'', req:'선택', len:'NUMBER'},
+      {name:'ORIGINMERCHNAME',    desc:'', req:'선택', len:'VARCHAR2(100)'},
+      {name:'ORIGINMERCHBIZNO',   desc:'', req:'선택', len:'VARCHAR2(10)'},
+      {name:'BCMCCNAME',          desc:'', req:'선택', len:'VARCHAR2(50)'},
+      {name:'BCMCCCODE',          desc:'', req:'선택', len:'VARCHAR2(10)'},
+      {name:'MEMBCODE',           desc:'', req:'선택', len:'VARCHAR2(3)'},
+      {name:'MERCHCESSDATE',      desc:'', req:'선택', len:'DATE'},
+      {name:'TAXTYPE',            desc:'', req:'선택', len:'VARCHAR2(20)'},
+      {name:'TAXTYPEDATE',        desc:'', req:'선택', len:'DATE'},
+      {name:'APPRAMT1',           desc:'', req:'선택', len:'NUMBER'},
+      {name:'VAT1',               desc:'', req:'선택', len:'NUMBER'},
+      {name:'VATYN',              desc:'', req:'선택', len:'VARCHAR2(1)'},
+      {name:'WORKDATE',           desc:'', req:'선택', len:'DATE'},
+      {name:'ERRYN',              desc:'', req:'선택', len:'VARCHAR2(1)'},
+      {name:'TRACQ',              desc:'', req:'선택', len:'VARCHAR2(4)'},
+      {name:'CARD_APPROVAL_SEQ',  desc:'', req:'선택', len:'NUMBER'},
+      {name:'CARD_ACQUIRE_SEQ',   desc:'', req:'선택', len:'NUMBER'},
+      {name:'COMP_CODE',          desc:'', req:'필수', len:'VARCHAR2(25)'},
+      {name:'ORG_ID',             desc:'', req:'필수', len:'NUMBER'},
+      {name:'ORG_NAME',           desc:'', req:'필수', len:'VARCHAR2(50)'},
+      {name:'EAC_INVOICE_SEQ',    desc:'', req:'선택', len:'NUMBER'},
+      {name:'APPR',               desc:'', req:'선택', len:'VARCHAR2(1)'},
+      {name:'INVOICE_ID',         desc:'', req:'선택', len:'NUMBER'},
+      {name:'INVOICE_NUM',        desc:'', req:'선택', len:'VARCHAR2(50)'},
+      {name:'CREATION_DATE',      desc:'', req:'선택', len:'DATE'},
+      {name:'LAST_UPDATE_DATE',   desc:'', req:'선택', len:'DATE'},
+      {name:'LAST_UPDATE_USER_ID',desc:'', req:'선택', len:'VARCHAR2(50)'},
+    ],
+    logic: [
+      {type:'table', rows:[
+        {proc:'receive_A_proc',   desc:'국내 사용기록 수신'},
+        {proc:'receive_B_proc',   desc:'해외 사용기록 수신'},
+        {proc:'receive_C_proc',   desc:'매입분 수신'},
+        {proc:'receive_CA_proc',  desc:'카드취소 매입수신'},
+        {proc:'cancelled_bill_unuse', desc:'취소기록 정리'},
+      ]},
+      {type:'head', text:'■ receive_A_proc (국내 사용기록 수신) 상세 로직'},
+      {type:'normal', text:'□ 룩업 코드 XXEAC_VAT_BIZNO_CODE 에 사업자 코드가 존재하는 경우 아래와 같이 처리'},
+      {type:'detail_table', rows:[
+        {item:'승인금액', rule:'기존 승인금액 + 세액'},
+        {item:'세액',     rule:'0 으로 적용'},
+        {item:'팁금액',   rule:'0 으로 적용'},
+      ]},
+    ],
+    menu_screen: 'data:image/png;base64,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SAVchYC1zzg/wqEyyGXXnX1tqW+NnFDJyISkKJ8okAq5CwFrnnHpLzHVnCmlT843O8O4HHUt24a+TYAcUTmspuq9uXK5uYS8x1ZwppU/ONzvDuBx1LduGvk2AHFE5rKbqvblyubmA24xjr5v8KhMshl1519balvjZxQyciEpCifKJAKuQsBa55wf4VCZZDLrzr621LfGzihk5EJSFE+USAVchYC1zzj0l5jqzhTSp+cbneHcDjqW7cNfJsAOKJzWU3Ve3Llc3MJeY6s4U0qfnG53h3A46lu3DXybADiic1lN1Xty5XNzAbcYx183+FQmWQy686+ttS3xs4oZORCUhRPlEgFXIWAtc84P8KhMshl1519balvjZxQyciEpCifKJAKuQsBa55x6S8x1ZwppU/ONzvDuBx1LduGvk2AHFE5rKbqvblyubmEvMdWcKaVPzjc7w7gcdS3bhr5NgBxROaym6r25crm5gNuMY6+b/CoTLIZdedfW2pb42cUMnIhKQonyiQCrkLAWuecH+FQmWQy686+ttS3xs4oZORCUhRPlEgFXIWAtc849JeY6s4U0qfnG53h3A46lu3DXybADiic1lN1Xty5XNzCXmOrOFNKn5xud4dwOOpbtw18mwA4onNZTdV7cuVzcwG3GMdfN/hUJlkMuvOvrbUt8bOKGTkQlIUT5RIBVyFgLXPOD/CoTLIZdedfW2pb42cUMnIhKQonyiQCrkLAWuecekvMdWcKaVPzjc7w7gcdS3bhr5NgBxROaym6r25crm5hLzHVnCmlT843O8O4HHUt24a+TYAcUTmspuq9uXK5uYDbjGOvm/wAKhMshl1519balvjZxQyciEpCifKJAKuQsBa55wf4VCZZDLrzr621LfGzihk5EJSFE+USAVchYC1zzj0l5jqzhTSp+cbneHcDjqW7cNfJsAOKJzWU3Ve3Llc3MJeY6s4U0qfnG53h3A46lu3DXybADiic1lN1Xty5XNzAbcYx183+FQmWQy686+ttS3xs4oZORCUhRPlEgFXIWAtc84P8ACoTLIZdedfW2pb42cUMnIhKQonyiQCrkLAWuecekvMdWcKaVPzjc7w7gcdS3bhr5NgBxROaym6r25crm5hLzHVnCmlT843O8O4HHUt24a+TYAcUTmspuq9uXK5uYDbjGOvm/wqEyyGXXnX1tqW+NnFDJ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l1519balvjZxQyciEpCifKJAKuQsBa55wf4VCZZDLrzr621LfGzihk5EJSFE+USAVchYC1zzj0l5jqzhTSp+cbneHcDjqW7cNfJsAOKJzWU3Ve3Llc3MJeY6s4U0qfnG53h3A46lu3DXybADiic1lN1Xty5XNzAbcYx183+FQmWQy686+ttS3xs4oZORCUhRPlEgFXIWAtc84P8ACoTLIZdedfW2pb42cUMnIhKQonyiQCrkLAWuecekvMdWcKaVPzjc7w7gcdS3bhr5NgBxROaym6r25crm5hLzHVnCmlT843O8O4HHUt24a+TYAcUTmspuq9uXK5uYDbjGOvm/wqEyyGXXnX1tqW+NnFDJyISkKJ8okAq5CwFrnnB/hUJlkMuvOvrbUt8bOKGTkQlIUT5RIBVyFgLXPOPSXmOrOFNKn5xud4dwOOpbtw18mwA4onNZTdV7cuVzcwl5jqzhTSp+cbneHcDjqW7cNfJsAOKJzWU3Ve3Llc3MBtxjHXzf4VCZZDLrzr621LfGzihk5EJSFE+USAVchYC1zzg/wqEyyGXXnX1tqW+NnFDJyISkKJ8okAq5CwFrnnHpLzHVnCmlT843O8O4HHUt24a+TYAcUTmspuq9uXK5uYS8x1ZwppU/ONzvDuBx1LduGvk2AHFE5rKbqvblyubmA24xjr5v8KhMshl1519balvjZxQyciEpCifKJAKuQsBa55wf4VCZZDLrzr621LfGzihk5EJSFE+USAVchYC1zzj0l5jqzhTSp+cbneHcDjqW7cNfJsAOKJzWU3Ve3Llc3MJeY6s4U0qfnG53h3A46lu3DXybADiic1lN1Xty5XNzAbcYx183+FQmWQy686+ttS3xs4oZORCUhRPlEgFXIWAtc84P8KhMshl1519balvjZxQyciEpCifKJAKuQsBa55x6S8x1ZwppU/ONzvDuBx1LduGvk2AHFE5rKbqvblyubmEvMdWcKaVPzjc7w7gcdS3bhr5NgBxROaym6r25crm5gNuMY6+b/CoTLIZdedfW2pb42cUMnIhKQonyiQCrkLAWuecH+FQmWQy686+ttS3xs4oZORCUhRPlEgFXIWAtc849JeY6s4U0qfnG53h3A46lu3DXybADiic1lN1Xty5XNzCXmOrOFNKn5xud4dwOOpbtw18mwA4onNZTdV7cuVzcwG3GMdfN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',
+    content_desc: '',
+    program_logic: '쿠콘에서 법인카드 승인 및 매입된 데이터를 중개서버를 통해 컨커넌트 실행시 ERP DB로 I/F 받는 컨커넌트 이고 스케쥴러가 30분 단위로 실행'
+  },
+  '실물증빙인사발령정보적용': {
+    icon: '👥',
+    group: '컨커넌트',
+    overview: '인사발령 정보를 ERP 시스템으로부터 수신하여 실물증빙 전표에 적용하는 배치 프로그램',
+    history: [
+      {ver:'1.0', date:'2026.04.09', desc:'신규작성', author:'최준영'},
+    ],
+    input_params: [],
+    field_desc: [
+      {name:'USER_ID',             desc:'', req:'필수', len:'VARCHAR2(50)'},
+      {name:'USER_NAME',           desc:'', req:'선택', len:'VARCHAR2(50)'},
+      {name:'COMP_CODE',           desc:'', req:'필수', len:'VARCHAR2(25)'},
+      {name:'ORG_ID',              desc:'', req:'필수', len:'NUMBER'},
+      {name:'ORG_NAME',            desc:'', req:'선택', len:'VARCHAR2(50)'},
+      {name:'PASSWORD',            desc:'', req:'선택', len:'VARCHAR2(250)'},
+      {name:'EMP_NUM',             desc:'', req:'필수', len:'VARCHAR2(25)'},
+      {name:'DEPT_CODE',           desc:'', req:'필수', len:'VARCHAR2(25)'},
+      {name:'AUTHORITY_LEVEL',     desc:'', req:'필수', len:'VARCHAR2(1)'},
+      {name:'ERP_USER_ID',         desc:'', req:'필수', len:'NUMBER'},
+      {name:'EFFECTIVE_FROM_DATE', desc:'', req:'필수', len:'DATE'},
+      {name:'EFFECTIVE_TO_DATE',   desc:'', req:'선택', len:'DATE'},
+      {name:'CREATION_DATE',       desc:'', req:'필수', len:'DATE'},
+      {name:'CREATED_BY',          desc:'', req:'필수', len:'NUMBER'},
+      {name:'LAST_UPDATE_DATE',    desc:'', req:'선택', len:'DATE'},
+      {name:'LAST_UPDATED_BY',     desc:'', req:'선택', len:'NUMBER'},
+      {name:'LAST_UPDATE_LOGIN',   desc:'', req:'선택', len:'NUMBER'},
+      {name:'HR_IF_SEQ_ID',        desc:'', req:'선택', len:'NUMBER'},
+    ],
+    logic: [],
+    menu_screen: '',
+    content_desc: '',
+    program_logic: ''
+  },
+  '전자세금계산서발행결과수신': {
+    icon: '📨',
+    group: '컨커넌트',
+    overview: '전자세금계산서 발행 결과를 외부 시스템으로부터 수신하여 전자증빙 시스템에 반영하는 배치 프로그램',
+    history: [
+      {ver:'1.0', date:'2026.04.09', desc:'신규작성', author:'최준영'},
+    ],
+    input_params: [],
+    field_desc: [
+      {name:'CONVERSATION_ID',    desc:'장조번호',          req:'필수', len:'NVARCHAR2(35)'},
+      {name:'SUPBUY_TYPE',        desc:'매출/매입 구분',    req:'필수', len:'NVARCHAR2(2)'},
+      {name:'DIRECTION',          desc:'정/역 구분',        req:'필수', len:'NVARCHAR2(1)'},
+      {name:'DTI_STATUS',         desc:'세금계산서 상태',   req:'필수', len:'NVARCHAR2(1)'},
+      {name:'TRAN_STATUS',        desc:'전송 상태',         req:'선택', len:'NVARCHAR2(1)'},
+      {name:'FINAL_STATUS',       desc:'최종상태',          req:'선택', len:'NVARCHAR2(1)'},
+      {name:'SUP_PRINT_CNT',      desc:'공급자 출력 횟수',  req:'선택', len:'NUMBER(3)'},
+      {name:'BYR_PRINT_CNT',      desc:'공급받는자 출력 횟수', req:'선택', len:'NUMBER(3)'},
+      {name:'RETURN_CODE',        desc:'응답 코드',         req:'선택', len:'NVARCHAR2(5)'},
+      {name:'RETURN_DESCRIPTION', desc:'응답 메세지',       req:'선택', len:'NVARCHAR2(2000)'},
+      {name:'SBDESCRIPTION',      desc:'취소 거부 사유',    req:'선택', len:'NVARCHAR2(70)'},
+      {name:'DEPT_NAME',          desc:'부서명',            req:'선택', len:'NVARCHAR2(40)'},
+      {name:'ATT01',              desc:'',                  req:'선택', len:'NVARCHAR2(100)'},
+      {name:'ATT02',              desc:'',                  req:'선택', len:'NVARCHAR2(100)'},
+      {name:'ATT03',              desc:'',                  req:'선택', len:'NVARCHAR2(100)'},
+      {name:'ATT04',              desc:'',                  req:'선택', len:'NVARCHAR2(100)'},
+      {name:'ATT05',              desc:'',                  req:'선택', len:'NVARCHAR2(100)'},
+      {name:'ATT06',              desc:'',                  req:'선택', len:'NVARCHAR2(100)'},
+      {name:'ATT07',              desc:'',                  req:'선택', len:'NVARCHAR2(100)'},
+      {name:'ATT08',              desc:'',                  req:'선택', len:'NVARCHAR2(100)'},
+      {name:'ATT09',              desc:'',                  req:'선택', len:'NVARCHAR2(100)'},
+      {name:'ATT10',              desc:'',                  req:'선택', len:'NVARCHAR2(100)'},
+      {name:'ATT11',              desc:'',                  req:'선택', len:'NVARCHAR2(100)'},
+      {name:'SEND_REQUEST',       desc:'국세청 전송결과',   req:'선택', len:'NVARCHAR2(2)'},
+      {name:'SEND_REQUEST_DESC',  desc:'',                  req:'선택', len:'NVARCHAR2(100)'},
+      {name:'RESULT_REQUEST',     desc:'',                  req:'선택', len:'NVARCHAR2(6)'},
+      {name:'ERROR_MSG',          desc:'국세청 오류 메세지', req:'선택', len:'NVARCHAR2(100)'},
+      {name:'CREATED_BY',         desc:'생성자',            req:'선택', len:'NVARCHAR2(15)'},
+      {name:'CREATION_DATE',      desc:'생성시간',          req:'선택', len:'DATE'},
+      {name:'LAST_UPDATED_BY',    desc:'수정자',            req:'선택', len:'NVARCHAR2(15)'},
+      {name:'LAST_UPDATE_DATE',   desc:'수정시간',          req:'선택', len:'DATE'},
+    ],
+    logic: [],
+    menu_screen: '',
+    content_desc: '',
+    program_logic: ''
+  },
+  '전자세금계산서수신': {
+    icon: '📩',
+    group: '컨커넌트',
+    overview: '전자세금계산서를 외부 시스템으로부터 수신하여 전자증빙 시스템에 반영하는 배치 프로그램',
+    history: [
+      {ver:'1.0', date:'2026.04.09', desc:'신규작성', author:'최준영'},
+    ],
+    input_params: [],
+    field_desc: [
+      {name:'ETAX_BILL_SEQ',       desc:'', req:'필수', len:'NUMBER'},
+      {name:'CONVERSATION_ID',     desc:'', req:'필수', len:'VARCHAR2(35)'},
+      {name:'SUPBUY_TYPE',         desc:'', req:'필수', len:'VARCHAR2(2)'},
+      {name:'DIRECTION',           desc:'', req:'필수', len:'VARCHAR2(1)'},
+      {name:'BILL_DATE',           desc:'', req:'필수', len:'DATE'},
+      {name:'SUPPLIER_BUZNUM',     desc:'', req:'필수', len:'VARCHAR2(10)'},
+      {name:'SUPPLIER_NAME',       desc:'', req:'선택', len:'VARCHAR2(240)'},
+      {name:'COMPANY_BUZNUM',      desc:'', req:'선택', len:'VARCHAR2(10)'},
+      {name:'COMPANY_NAME',        desc:'', req:'선택', len:'VARCHAR2(240)'},
+      {name:'SITE_LOC_CODE',       desc:'', req:'선택', len:'VARCHAR2(30)'},
+      {name:'ETAX_BILL_TITLE',     desc:'', req:'선택', len:'VARCHAR2(240)'},
+      {name:'CURRENCY_CODE',       desc:'', req:'선택', len:'VARCHAR2(3)'},
+      {name:'SUPPLY_AMOUNT',       desc:'', req:'선택', len:'NUMBER'},
+      {name:'VAT_AMOUNT',          desc:'', req:'선택', len:'NUMBER'},
+      {name:'TOT_AMOUNT',          desc:'', req:'선택', len:'NUMBER'},
+      {name:'BUYER_EMAIL',         desc:'', req:'선택', len:'VARCHAR2(50)'},
+      {name:'APPRNO',              desc:'', req:'선택', len:'VARCHAR2(30)'},
+      {name:'MATCH_STATUS_CODE',   desc:'', req:'선택', len:'VARCHAR2(10)'},
+      {name:'ORG_ID',              desc:'', req:'선택', len:'NUMBER'},
+      {name:'EAC_INVOICE_SEQ',     desc:'', req:'선택', len:'NUMBER'},
+      {name:'APPR',                desc:'', req:'선택', len:'VARCHAR2(1)'},
+      {name:'INVOICE_ID',          desc:'', req:'선택', len:'NUMBER'},
+      {name:'INVOICE_NUM',         desc:'', req:'선택', len:'VARCHAR2(50)'},
+      {name:'CREATION_DATE',       desc:'', req:'선택', len:'DATE'},
+      {name:'LAST_UPDATE_DATE',    desc:'', req:'선택', len:'DATE'},
+      {name:'LAST_UPDATE_USER_ID', desc:'', req:'선택', len:'VARCHAR2(50)'},
+      {name:'ATTRIBUTE5',          desc:'', req:'선택', len:'VARCHAR2(128)'},
+      {name:'ATTRIBUTE1',          desc:'', req:'선택', len:'VARCHAR2(128)'},
+      {name:'ATTRIBUTE2',          desc:'', req:'선택', len:'VARCHAR2(128)'},
+      {name:'ATTRIBUTE3',          desc:'', req:'선택', len:'VARCHAR2(128)'},
+      {name:'ATTRIBUTE4',          desc:'', req:'선택', len:'VARCHAR2(128)'},
+    ],
+    logic: [
+      {type:'normal', text:'□ 세관에서 수신받은 e-mail 담당자 지정은 룩업(XXEAC_ETAX_EMAIL_SETUP) 에서 지정'},
+    ],
+    menu_screen: '',
+    content_desc: '',
+    program_logic: '스마트빌 전자세금계산서 매입 승인 된 데이터를 중개서버를 통해 컨커넌트 실행시 ERP DB로 I/F 받는 컨커넌트 이고 스케쥴러가 2시간 단위로 실행'
+  }
+};
+
+// ──────────────────────────────────────────────
+// MENU STATE
+// ──────────────────────────────────────────────
+let menuItems = [
+  {id:'home', label:'홈', icon:'🏠', type:'home', group:''},
+  {id:'계정분류', label:'계정분류', icon:'📂', type:'fd', group:'시스템 관리'},
+  {id:'사용자관리', label:'사용자관리', icon:'👤', type:'fd', group:'시스템 관리'},
+  {id:'프로그램관리', label:'프로그램관리', icon:'⚙️', type:'fd', group:'시스템 관리'},
+  {id:'결재요청', label:'결재요청', icon:'✅', type:'fd', group:'결재 관리'},
+  {id:'결재조회', label:'결재조회', icon:'🔍', type:'fd', group:'결재 관리'},
+  {id:'매입전자세금계산서', label:'매입전자세금계산서', icon:'🧾', type:'fd', group:'매입전표 관리'},
+  {id:'법인카드전표등록', label:'법인카드전표등록', icon:'💳', type:'fd', group:'매입전표 관리'},
+  {id:'실물증빙전표등록', label:'실물증빙전표등록', icon:'📄', type:'fd', group:'매입전표 관리'},
+  {id:'법인카드승인내역수신', label:'법인카드 승인내역 수신', icon:'📥', type:'fd', group:'컨커넌트'},
+  {id:'실물증빙인사발령정보적용', label:'실물증빙: 인사발령정보 적용', icon:'👥', type:'fd', group:'컨커넌트'},
+  {id:'전자세금계산서발행결과수신', label:'전자세금계산서 발행결과 수신', icon:'📨', type:'fd', group:'컨커넌트'},
+  {id:'전자세금계산서수신', label:'전자세금계산서 수신', icon:'📩', type:'fd', group:'컨커넌트'},
+];
+let activeId = 'home';
+let editingId = null;
+let sidebarOpen = true;
+let collapsedGroups = new Set(['시스템 관리','결재 관리','매입전표 관리','컨커넌트']);
+
+// ──────────────────────────────────────────────
+// RENDER SIDEBAR
+// ──────────────────────────────────────────────
+function renderSidebar() {
+  const scroll = document.getElementById('sidebarScroll');
+  const groups = {};
+  const groupOrder = [];
+  menuItems.forEach(item => {
+    const g = item.group || '__top__';
+    if (!groups[g]) { groups[g] = []; groupOrder.push(g); }
+    groups[g].push(item);
+  });
+
+  let html = '';
+  if (groups['__top__']) {
+    groups['__top__'].forEach(item => { html += renderMenuItem(item); });
+  }
+  groupOrder.filter(g => g !== '__top__').forEach(g => {
+    const isCollapsed = collapsedGroups.has(g) ? 'collapsed' : '';
+    const gid = g.replace(/\s/g,'_');
+    html += `<div class="menu-group ${isCollapsed}" id="grp_${gid}">
+      <div class="menu-group-label" onclick="toggleGroup('${g}')">
+        <span>${g}</span><span class="arrow">▼</span>
+      </div>
+      <div class="menu-group-items">`;
+    groups[g].forEach(item => { html += renderMenuItem(item); });
+    html += `</div></div>`;
+  });
+  scroll.innerHTML = html;
+}
+
+function toggleGroup(g) {
+  if (collapsedGroups.has(g)) collapsedGroups.delete(g);
+  else collapsedGroups.add(g);
+  renderSidebar();
+}
+
+function renderMenuItem(item) {
+  const isActive = item.id === activeId;
+  const isEditing = item.id === editingId;
+  const isSub = item.group === '컨커넌트';
+  return `
+  <div class="menu-item ${isActive ? 'active' : ''} ${isSub ? 'sub-item' : ''}" id="mi_${item.id}"
+       onclick="selectMenu('${item.id}', event)">
+    <span class="menu-item-icon">${item.icon}</span>
+    ${isEditing
+      ? `<input class="edit-input" id="edit_${item.id}" value="${item.label}"
+           onclick="event.stopPropagation()"
+           onkeydown="editKeydown(event,'${item.id}')"
+           onblur="finishEdit('${item.id}')" />`
+      : `<span class="menu-item-label">${item.label}</span>`
+    }
+    <div class="menu-item-actions">
+      ${!isEditing ? `<button class="mact-btn" title="이름 변경" onclick="startEdit('${item.id}',event)">✏️</button>` : ''}
+    </div>
+  </div>`;
+}
+
+// ──────────────────────────────────────────────
+// MENU ACTIONS
+// ──────────────────────────────────────────────
+function selectMenu(id, e) {
+  if (editingId) return;
+  activeId = id;
+  renderSidebar();
+  renderContent();
+  document.getElementById('breadcrumbCurrent').textContent =
+    id === 'home' ? '홈' : menuItems.find(m=>m.id===id)?.label || id;
+}
+
+function startEdit(id, e) {
+  e.stopPropagation();
+  editingId = id;
+  renderSidebar();
+  setTimeout(() => {
+    const inp = document.getElementById(`edit_${id}`);
+    if (inp) { inp.focus(); inp.select(); }
+  }, 50);
+}
+
+function finishEdit(id) {
+  const inp = document.getElementById(`edit_${id}`);
+  if (inp) {
+    const item = menuItems.find(m => m.id === id);
+    if (item) item.label = inp.value.trim() || item.label;
+  }
+  editingId = null;
+  renderSidebar();
+}
+
+function editKeydown(e, id) {
+  if (e.key === 'Enter') finishEdit(id);
+  if (e.key === 'Escape') { editingId = null; renderSidebar(); }
+}
+
+function deleteMenu(id, e) {
+  e.stopPropagation();
+  if (!confirm('이 메뉴 항목을 삭제하시겠습니까?')) return;
+  menuItems = menuItems.filter(m => m.id !== id);
+  if (activeId === id) { activeId = 'home'; renderContent(); }
+  renderSidebar();
+}
+
+function openAddModal() { document.getElementById('addModal').classList.add('open'); }
+function closeAddModal() { document.getElementById('addModal').classList.remove('open'); }
+
+function addMenuItem() {
+  const name = document.getElementById('newMenuName').value.trim();
+  const group = document.getElementById('newMenuGroup').value;
+  const icon = document.getElementById('newMenuIcon').value.trim() || '📄';
+  if (!name) { alert('메뉴명을 입력하세요.'); return; }
+  const id = 'custom_' + Date.now();
+  menuItems.push({ id, label: name, icon, type: 'custom', group });
+  closeAddModal();
+  document.getElementById('newMenuName').value = '';
+  document.getElementById('newMenuIcon').value = '';
+  renderSidebar();
+}
+
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('collapsed', !sidebarOpen);
+}
+
+// ──────────────────────────────────────────────
+// RENDER CONTENT
+// ──────────────────────────────────────────────
+function renderContent() {
+  const mc = document.getElementById('mainContent');
+  if (activeId === 'home') { mc.innerHTML = renderHome(); return; }
+  const item = menuItems.find(m => m.id === activeId);
+  if (!item) { mc.innerHTML = renderEmpty(); return; }
+  const data = FD_DATA[item.id] || FD_DATA[item.label];
+  if (!data) { mc.innerHTML = renderEmpty(item.label); return; }
+  mc.innerHTML = renderFD(item, data);
+  // section toggles
+  document.querySelectorAll('.section-header').forEach(h => {
+    h.addEventListener('click', () => {
+      h.classList.toggle('open');
+      h.nextElementSibling.classList.toggle('open');
+    });
+    // open by default
+    h.classList.add('open');
+    h.nextElementSibling.classList.add('open');
+  });
+}
+
+// ──────────────────────────────────────────────
+// RENDER HOME
+// ──────────────────────────────────────────────
+function renderHome() {
+  const totalPrograms = Object.keys(FD_DATA).length;
+  const totalFields = Object.values(FD_DATA).reduce((a,d)=>a+d.field_desc.length,0);
+  const cards = Object.entries(FD_DATA).map(([name,data]) => `
+    <div class="welcome-card" onclick="selectMenuByName('${name}')">
+      <div class="icon">${data.icon || '📄'}</div>
+      <h4>${name}</h4>
+      <p>${data.overview.substring(0,60)}...</p>
+      <div class="arrow">→ 보기</div>
+    </div>`).join('');
+
+  return `
+  <div class="welcome-page">
+    <div class="welcome-hero">
+      <h1>📋 이수페타시스 전자증빙 FD 매뉴얼</h1>
+      <p>기능 설계서(Functional Design) 운영 개발자 참조 문서입니다.<br>
+         좌측 메뉴에서 프로그램을 선택하거나, 아래 카드를 클릭하여 FD를 조회하세요.<br>
+         메뉴 이름을 더블클릭하거나 ✏️ 버튼으로 메뉴명을 변경할 수 있습니다.</p>
+      <div class="welcome-stats">
+        <div class="stat-card"><div class="num">${totalPrograms}</div><div class="lbl">전체 프로그램</div></div>
+        <div class="stat-card"><div class="num">${totalFields}</div><div class="lbl">전체 Field</div></div>
+        <div class="stat-card"><div class="num">3</div><div class="lbl">모듈 그룹</div></div>
+      </div>
+    </div>
+    <div class="welcome-grid">${cards}</div>
+  </div>`;
+}
+
+function selectMenuByName(name) {
+  const item = menuItems.find(m => m.id === name || m.label === name);
+  if (item) { activeId = item.id; renderSidebar(); renderContent();
+    document.getElementById('breadcrumbCurrent').textContent = item.label; }
+}
+
+// ──────────────────────────────────────────────
+// RENDER FD PAGE
+// ──────────────────────────────────────────────
+function renderFD(item, data) {
+  const latestVer = data.history.slice(-1)[0] || {};
+  const groupTag = item.group ? `<span class="tag tag-gray">${item.group}</span>` : '';
+
+  // history rows
+  const histRows = data.history.map(h => `
+    <tr>
+      <td><span class="req-badge req-display">${h.ver}</span></td>
+      <td>${h.date}</td>
+      <td>${h.desc}</td>
+      <td>${h.author}</td>
+      <td></td><td></td>
+    </tr>`).join('');
+
+  // input params table
+  const inputRows = data.input_params.map(f => `
+    <tr>
+      <td class="field-name">${esc(f.name)}</td>
+      <td class="field-desc">${esc(f.desc)}</td>
+      <td>${reqBadge(f.req)}</td>
+      <td class="field-len">${esc(f.len)}</td>
+    </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:20px">정의된 Input Parameter가 없습니다</td></tr>';
+
+  // field desc table
+  const fieldRows = data.field_desc.map((f, i) => `
+    <tr>
+      <td class="field-name">${esc(f.name)}</td>
+      <td class="field-desc">${esc(f.desc || '')}</td>
+      <td>${reqBadge(f.req)}</td>
+      <td class="field-len">${esc(f.len)}</td>
+    </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:20px">정의된 Field가 없습니다</td></tr>';
+
+  // logic list
+  const logicItems = data.logic.map(l => {
+    if (l.type === 'table') {
+      const rows = l.rows.map(r => `
+        <tr>
+          <td class="field-name" style="font-family:monospace;font-size:12px;">${esc(r.proc)}</td>
+          <td class="field-desc">${esc(r.desc)}</td>
+        </tr>`).join('');
+      return `<div class="logic-item" style="padding:0">
+        <div class="fd-table-wrap">
+          <table class="fd-table">
+            <thead><tr><th style="width:220px">프로시저명</th><th>내용</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>`;
+    }
+    if (l.type === 'detail_table') {
+      const rows = l.rows.map(r => `
+        <tr>
+          <td class="field-name">${esc(r.item)}</td>
+          <td class="field-desc">${esc(r.rule)}</td>
+        </tr>`).join('');
+      return `<div class="logic-item" style="padding:0 0 0 24px">
+        <div class="fd-table-wrap">
+          <table class="fd-table">
+            <thead><tr><th style="width:120px">항목</th><th>처리 규칙</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>`;
+    }
+    if (l.type === 'code') return `<div class="logic-item code-block">${esc(l.text)}</div>`;
+    return `<div class="logic-item normal">${esc(l.text)}</div>`;
+  }).join('') || '<div style="padding:16px 20px;color:#94a3b8;font-size:13px">정의된 로직이 없습니다</div>';
+
+  return `
+  <div class="fd-page">
+    <!-- HEADER CARD -->
+    <div class="fd-header-card">
+      <div class="fd-prog-title">
+        <div class="fd-prog-icon">${data.icon || '📄'}</div>
+        <div class="fd-prog-info">
+          <h1>${item.label}</h1>
+          <div class="tags">
+            ${groupTag}
+            <span class="tag tag-blue">기능설계서 (FD)</span>
+            <span class="tag tag-green">ver ${latestVer.ver || '-'}</span>
+            <span class="tag tag-gray">${latestVer.date || '-'}</span>
+          </div>
+        </div>
+      </div>
+      <div class="fd-meta-grid">
+        <div class="fd-meta-item"><div class="lbl">프로젝트</div><div class="val">이수페타시스 전자증빙</div></div>
+        <div class="fd-meta-item"><div class="lbl">단계</div><div class="val">운영</div></div>
+        <div class="fd-meta-item"><div class="lbl">작성자</div><div class="val">${latestVer.author || '-'}</div></div>
+        <div class="fd-meta-item"><div class="lbl">최종 수정일</div><div class="val">${latestVer.date || '-'}</div></div>
+      </div>
+    </div>
+
+    <!-- 1. 개요 -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="sec-icon sec-blue">📌</div>
+        <h2>1. 프로그램 개요 및 목적</h2>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="section-body">
+        <div class="extra-toolbar" style="margin-bottom:10px;">
+          <button class="extra-edit-btn" id="overviewEditBtn_${item.id}" onclick="toggleOverviewEdit('${item.id}')">✏️ 편집</button>
+          <button class="extra-save-btn" id="overviewSaveBtn_${item.id}" onclick="saveOverview('${item.id}')" style="display:none">💾 저장</button>
+        </div>
+        <div id="overviewView_${item.id}" class="overview-text">${esc(data.overview)}</div>
+        <textarea id="overviewEdit_${item.id}" style="display:none;width:100%;box-sizing:border-box;padding:12px;border:1px solid #3b82f6;border-radius:6px;font-size:13px;font-family:inherit;resize:vertical;min-height:80px;">${data.overview||''}</textarea>
+      </div>
+    </div>
+
+    <!-- 2. 변경이력 -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="sec-icon sec-purple">🕒</div>
+        <h2>2. 변경이력</h2>
+        <span class="count">${data.history.length}건</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="section-body">
+        <div class="extra-toolbar" style="margin-bottom:10px;">
+          <button class="extra-edit-btn" id="histEditBtn_${item.id}" onclick="toggleHistEdit('${item.id}')">✏️ 편집</button>
+          <button class="extra-save-btn" id="histSaveBtn_${item.id}" onclick="saveHist('${item.id}')" style="display:none">💾 저장</button>
+        </div>
+        <div class="fd-table-wrap">
+          <table class="history-table" id="histTable_${item.id}">
+            <thead>
+              <tr><th>버전</th><th>변경일자</th><th>변경내용</th><th>작성자</th><th>승인일자</th><th>승인자</th></tr>
+            </thead>
+            <tbody>${histRows}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Input Parameter -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="sec-icon sec-green">🔎</div>
+        <h2>3. Input Parameter (조회 조건)</h2>
+        <span class="count">${data.input_params.length}개</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="section-body">
+        <div class="extra-toolbar" style="margin-bottom:10px;">
+          <button class="extra-edit-btn" id="inputEditBtn_${item.id}" onclick="toggleInputEdit('${item.id}')">✏️ 편집</button>
+          <button class="extra-save-btn" id="inputSaveBtn_${item.id}" onclick="saveInput('${item.id}')" style="display:none">💾 저장</button>
+        </div>
+        <div class="fd-table-wrap">
+          <table class="fd-table" id="inputTable_${item.id}">
+            <thead>
+              <tr><th style="width:160px">Field명</th><th>Field 설명</th><th style="width:100px">필수/선택</th><th style="width:110px">Field 길이</th></tr>
+            </thead>
+            <tbody>${inputRows}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Field Description -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="sec-icon sec-yellow">📋</div>
+        <h2>4. Field Description (화면 결과 필드)</h2>
+        <span class="count">${data.field_desc.length}개</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="section-body">
+        <div class="extra-toolbar" style="margin-bottom:10px;">
+          <button class="extra-edit-btn" id="fieldEditBtn_${item.id}" onclick="toggleFieldEdit('${item.id}')">✏️ 편집</button>
+          <button class="extra-save-btn" id="fieldSaveBtn_${item.id}" onclick="saveFieldDesc('${item.id}')" style="display:none">💾 저장</button>
+        </div>
+        <div class="fd-table-wrap">
+          <table class="fd-table" id="fieldTable_${item.id}">
+            <thead>
+              <tr><th style="width:180px">Field명</th><th>Field 설명</th><th style="width:100px">필수/선택</th><th style="width:110px">Type</th></tr>
+            </thead>
+            <tbody>${fieldRows}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. 처리 Logic -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="sec-icon sec-red">⚡</div>
+        <h2>5. 처리 Logic</h2>
+        <span class="count">${data.logic.length}항목</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="section-body">
+        <div class="extra-toolbar" style="margin-bottom:10px;">
+          <button class="extra-edit-btn" id="logicEditBtn_${item.id}" onclick="toggleLogicEdit('${item.id}')">✏️ 편집</button>
+          <button class="extra-save-btn" id="logicSaveBtn_${item.id}" onclick="saveLogic('${item.id}')" style="display:none">💾 저장</button>
+        </div>
+        <div id="logicView_${item.id}" class="logic-list">${logicItems}</div>
+        <textarea id="logicEdit_${item.id}" style="display:none;width:100%;box-sizing:border-box;padding:12px;border:1px solid #3b82f6;border-radius:6px;font-size:13px;font-family:monospace;resize:vertical;min-height:120px;" placeholder="로직 내용을 입력하세요...">${data.logic.filter(l=>l.type==='normal'||l.type==='head'||l.type==='code').map(l=>l.text).join('\n')}</textarea>
+      </div>
+    </div>
+
+    ${['법인카드승인내역수신','실물증빙인사발령정보적용','전자세금계산서발행결과수신','전자세금계산서수신'].includes(item.id) ? `
+    <!-- 6. 메뉴 화면 -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="sec-icon sec-blue">🖥️</div>
+        <h2>6. 메뉴 화면</h2>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="section-body">
+        <div class="extra-section-wrap">
+          <div class="extra-toolbar">
+            <button class="extra-edit-btn" onclick="toggleEdit('menuScreen')">✏️ 편집</button>
+            <button class="extra-save-btn" id="saveBtn_menuScreen" onclick="saveExtra('menuScreen')" style="display:none">💾 저장</button>
+          </div>
+          <div id="view_menuScreen" class="extra-view">
+            ${data.menu_screen
+              ? (data.menu_screen.startsWith('data:image')
+                  ? `<div class="screen-img-wrap"><img src="${data.menu_screen}" class="screen-img" /></div>`
+                  : `<div id="text_menuScreen" class="extra-text">${esc(data.menu_screen)}</div>`)
+              : `<div class="extra-upload-area" onclick="document.getElementById('imgUpload_menuScreen').click()">
+                  <span>🖼️ 클릭하여 화면 이미지를 업로드하세요</span>
+                  <input type="file" id="imgUpload_menuScreen" accept="image/*" style="display:none"
+                    onchange="handleImgUpload('menuScreen', this)" />
+                </div>`
+            }
+          </div>
+          <div id="edit_menuScreen" class="extra-editor" style="display:none">
+            <textarea id="ta_menuScreen" placeholder="메뉴 화면에 대한 설명을 입력하세요..." rows="6"
+              style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;resize:vertical;">${data.menu_screen && !data.menu_screen.startsWith('data:image') ? esc(data.menu_screen) : ''}</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. 프로그램 로직 설명 -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="sec-icon sec-purple">🔧</div>
+        <h2>7. 프로그램 로직 설명</h2>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="section-body">
+        <div class="extra-section-wrap">
+          <div class="extra-toolbar">
+            <button class="extra-edit-btn" onclick="toggleEdit('programLogic')">✏️ 편집</button>
+            <button class="extra-save-btn" id="saveBtn_programLogic" onclick="saveExtra('programLogic')" style="display:none">💾 저장</button>
+          </div>
+          <div id="edit_programLogic" class="extra-editor" style="display:none">
+            <textarea id="ta_programLogic" placeholder="프로그램 로직에 대한 설명을 입력하세요..." rows="10"
+              style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;font-family:monospace;resize:vertical;">${data.program_logic||''}</textarea>
+          </div>
+          <div id="text_programLogic" class="extra-text">${data.program_logic ? esc(data.program_logic) : '<span style="color:#94a3b8">내용을 입력하세요.</span>'}</div>
+        </div>
+      </div>
+    </div>
+    ` : ''}
+  </div>`;
+}
+
+function renderEmpty(name) {
+  return `<div class="empty-state">
+    <div class="icon">📭</div>
+    <p>${name ? `'${name}' 에 대한 FD 문서가 없습니다.` : '메뉴를 선택하세요.'}</p>
+  </div>`;
+}
+
+// ──────────────────────────────────────────────
+// HELPERS
+// ──────────────────────────────────────────────
+function esc(s) {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/\n/g,'<br>');
+}
+
+function reqBadge(req) {
+  if (!req) return '';
+  const r = req.toLowerCase();
+  if (r.includes('필수')) return `<span class="req-badge req-필수">필수</span>`;
+  if (r.includes('선택')) return `<span class="req-badge req-선택">선택</span>`;
+  if (r.includes('display') || r.includes('only')) return `<span class="req-badge req-display">Display</span>`;
+  if (r.includes('버튼')) return `<span class="req-badge req-display">버튼</span>`;
+  return `<span class="req-badge req-default">${esc(req)}</span>`;
+}
+
+// ──────────────────────────────────────────────
+// 5. 처리 Logic 편집/저장
+// ──────────────────────────────────────────────
+let logicEditMode = {};
+function toggleLogicEdit(itemId) {
+  const view = document.getElementById('logicView_' + itemId);
+  const edit = document.getElementById('logicEdit_' + itemId);
+  const editBtn = document.getElementById('logicEditBtn_' + itemId);
+  const saveBtn = document.getElementById('logicSaveBtn_' + itemId);
+  const isEditing = logicEditMode[itemId];
+  if (!isEditing) {
+    // 현재 logic 데이터를 텍스트로 변환
+    const fdData = FD_DATA[itemId];
+    const lines = (fdData?.logic || [])
+      .filter(l => l.type === 'normal' || l.type === 'head' || l.type === 'code')
+      .map(l => l.text).join('\n');
+    edit.value = lines;
+    view.style.display = 'none';
+    edit.style.display = 'block';
+    editBtn.textContent = '✖ 취소'; editBtn.style.background = '#fee2e2'; editBtn.style.color = '#dc2626';
+    saveBtn.style.display = 'inline-flex';
+    logicEditMode[itemId] = true;
+  } else {
+    view.style.display = 'block';
+    edit.style.display = 'none';
+    editBtn.textContent = '✏️ 편집'; editBtn.style.background = ''; editBtn.style.color = '';
+    saveBtn.style.display = 'none';
+    logicEditMode[itemId] = false;
+  }
+}
+
+function saveLogic(itemId) {
+  const view = document.getElementById('logicView_' + itemId);
+  const edit = document.getElementById('logicEdit_' + itemId);
+  const editBtn = document.getElementById('logicEditBtn_' + itemId);
+  const saveBtn = document.getElementById('logicSaveBtn_' + itemId);
+  const val = edit.value.trim();
+  const fdData = FD_DATA[itemId];
+
+  // 기존 table/detail_table 타입은 유지하고 text 타입만 교체
+  const nonTextLogic = (fdData?.logic || []).filter(l => l.type === 'table' || l.type === 'detail_table');
+  const newTextLogic = val ? val.split('\n').map(line => {
+    if (line.startsWith('■')) return { type: 'head', text: line };
+    if (line.startsWith('--') || line.startsWith('SELECT') || line.startsWith('FROM') || line.startsWith('WHERE')) return { type: 'code', text: line };
+    return { type: 'normal', text: line };
+  }) : [];
+
+  if (fdData) fdData.logic = [...nonTextLogic, ...newTextLogic];
+
+  // 화면 다시 렌더링
+  const newItems = (fdData?.logic || []).map(l => {
+    if (l.type === 'table') {
+      const rows = l.rows.map(r => `<tr><td class="field-name" style="font-family:monospace;font-size:12px;">${esc(r.proc)}</td><td class="field-desc">${esc(r.desc)}</td></tr>`).join('');
+      return `<div class="logic-item" style="padding:0"><div class="fd-table-wrap"><table class="fd-table"><thead><tr><th style="width:220px">프로시저명</th><th>내용</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+    }
+    if (l.type === 'detail_table') {
+      const rows = l.rows.map(r => `<tr><td class="field-name">${esc(r.item)}</td><td class="field-desc">${esc(r.rule)}</td></tr>`).join('');
+      return `<div class="logic-item" style="padding:0 0 0 24px"><div class="fd-table-wrap"><table class="fd-table"><thead><tr><th style="width:120px">항목</th><th>처리 규칙</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+    }
+    if (l.type === 'head') return `<div class="logic-item section-head">🔷 ${esc(l.text)}</div>`;
+    if (l.type === 'code') return `<div class="logic-item code-block">${esc(l.text)}</div>`;
+    return `<div class="logic-item normal">${esc(l.text)}</div>`;
+  }).join('') || '<div style="padding:16px 20px;color:#94a3b8;font-size:13px">정의된 로직이 없습니다</div>';
+
+  view.innerHTML = newItems;
+  view.style.display = 'block';
+  edit.style.display = 'none';
+  editBtn.textContent = '✏️ 편집'; editBtn.style.background = ''; editBtn.style.color = '';
+  saveBtn.style.display = 'none';
+  logicEditMode[itemId] = false;
+
+  try {
+    const s = JSON.parse(localStorage.getItem('fd_logic') || '{}');
+    s[itemId] = val;
+    localStorage.setItem('fd_logic', JSON.stringify(s));
+  } catch(e) {}
+}
+
+// ──────────────────────────────────────────────
+// 1. 개요 편집/저장
+// ──────────────────────────────────────────────
+let overviewEditMode = {};
+function toggleOverviewEdit(itemId) {
+  const view = document.getElementById('overviewView_' + itemId);
+  const edit = document.getElementById('overviewEdit_' + itemId);
+  const editBtn = document.getElementById('overviewEditBtn_' + itemId);
+  const saveBtn = document.getElementById('overviewSaveBtn_' + itemId);
+  const isEditing = overviewEditMode[itemId];
+  if (!isEditing) {
+    edit.value = FD_DATA[itemId]?.overview || '';
+    view.style.display = 'none';
+    edit.style.display = 'block';
+    editBtn.textContent = '✖ 취소'; editBtn.style.background='#fee2e2'; editBtn.style.color='#dc2626';
+    saveBtn.style.display = 'inline-flex';
+    overviewEditMode[itemId] = true;
+  } else {
+    view.style.display = 'block'; edit.style.display = 'none';
+    editBtn.textContent = '✏️ 편집'; editBtn.style.background=''; editBtn.style.color='';
+    saveBtn.style.display = 'none';
+    overviewEditMode[itemId] = false;
+  }
+}
+function saveOverview(itemId) {
+  const view = document.getElementById('overviewView_' + itemId);
+  const edit = document.getElementById('overviewEdit_' + itemId);
+  const editBtn = document.getElementById('overviewEditBtn_' + itemId);
+  const saveBtn = document.getElementById('overviewSaveBtn_' + itemId);
+  const val = edit.value.trim();
+  if (FD_DATA[itemId]) FD_DATA[itemId].overview = val;
+  view.textContent = val;
+  view.style.display = 'block'; edit.style.display = 'none';
+  editBtn.textContent = '✏️ 편집'; editBtn.style.background=''; editBtn.style.color='';
+  saveBtn.style.display = 'none';
+  overviewEditMode[itemId] = false;
+  try {
+    const s = JSON.parse(localStorage.getItem('fd_overview') || '{}');
+    s[itemId] = val; localStorage.setItem('fd_overview', JSON.stringify(s));
+  } catch(e) {}
+}
+
+// ──────────────────────────────────────────────
+// 2. 변경이력 편집/저장
+// ──────────────────────────────────────────────
+let histEditMode = {};
+function toggleHistEdit(itemId) {
+  const table = document.getElementById('histTable_' + itemId);
+  const editBtn = document.getElementById('histEditBtn_' + itemId);
+  const saveBtn = document.getElementById('histSaveBtn_' + itemId);
+  const isEditing = histEditMode[itemId];
+  const cells = table.querySelectorAll('tbody tr td');
+  if (!isEditing) {
+    cells.forEach(cell => {
+      const cur = cell.textContent;
+      cell.innerHTML = `<input type="text" value="${cur.replace(/"/g,'&quot;')}" style="width:100%;box-sizing:border-box;padding:3px 6px;border:1px solid #3b82f6;border-radius:4px;font-size:12px;font-family:inherit;outline:none;" />`;
+    });
+    editBtn.textContent = '✖ 취소'; editBtn.style.background='#fee2e2'; editBtn.style.color='#dc2626';
+    saveBtn.style.display = 'inline-flex';
+    histEditMode[itemId] = true;
+  } else {
+    const fdData = FD_DATA[itemId];
+    cells.forEach((cell, idx) => {
+      const rowIdx = Math.floor(idx / 6);
+      const colIdx = idx % 6;
+      const val = fdData?.history[rowIdx] ? Object.values(fdData.history[rowIdx])[colIdx] || '' : '';
+      cell.textContent = val;
+    });
+    editBtn.textContent = '✏️ 편집'; editBtn.style.background=''; editBtn.style.color='';
+    saveBtn.style.display = 'none';
+    histEditMode[itemId] = false;
+  }
+}
+function saveHist(itemId) {
+  const table = document.getElementById('histTable_' + itemId);
+  const editBtn = document.getElementById('histEditBtn_' + itemId);
+  const saveBtn = document.getElementById('histSaveBtn_' + itemId);
+  const rows = table.querySelectorAll('tbody tr');
+  const keys = ['ver','date','desc','author','approveDate','approver'];
+  const fdData = FD_DATA[itemId];
+  const histData = [];
+  rows.forEach((row, ri) => {
+    const cells = row.querySelectorAll('td');
+    const obj = {};
+    cells.forEach((cell, ci) => {
+      const input = cell.querySelector('input');
+      const val = input ? input.value.trim() : cell.textContent;
+      obj[keys[ci]] = val;
+      if (fdData?.history[ri]) fdData.history[ri][keys[ci]] = val;
+      cell.textContent = val;
+    });
+    histData.push(obj);
+  });
+  editBtn.textContent = '✏️ 편집'; editBtn.style.background=''; editBtn.style.color='';
+  saveBtn.style.display = 'none';
+  histEditMode[itemId] = false;
+  try {
+    const s = JSON.parse(localStorage.getItem('fd_history') || '{}');
+    s[itemId] = histData; localStorage.setItem('fd_history', JSON.stringify(s));
+  } catch(e) {}
+}
+
+// ──────────────────────────────────────────────
+// 3. Input Parameter 편집/저장
+// ──────────────────────────────────────────────
+let inputEditMode = {};
+function toggleInputEdit(itemId) {
+  const table = document.getElementById('inputTable_' + itemId);
+  const editBtn = document.getElementById('inputEditBtn_' + itemId);
+  const saveBtn = document.getElementById('inputSaveBtn_' + itemId);
+  const isEditing = inputEditMode[itemId];
+  const cells = table.querySelectorAll('tbody tr td:nth-child(2)');
+  if (!isEditing) {
+    const fdData = FD_DATA[itemId];
+    cells.forEach((cell, i) => {
+      const val = fdData?.input_params[i]?.desc || '';
+      cell.innerHTML = `<input type="text" value="${val.replace(/"/g,'&quot;')}" style="width:100%;box-sizing:border-box;padding:4px 8px;border:1px solid #3b82f6;border-radius:4px;font-size:13px;font-family:inherit;outline:none;" />`;
+    });
+    editBtn.textContent = '✖ 취소'; editBtn.style.background='#fee2e2'; editBtn.style.color='#dc2626';
+    saveBtn.style.display = 'inline-flex';
+    inputEditMode[itemId] = true;
+  } else {
+    const fdData = FD_DATA[itemId];
+    cells.forEach((cell, i) => {
+      const val = fdData?.input_params[i]?.desc || '';
+      cell.textContent = val;
+    });
+    editBtn.textContent = '✏️ 편집'; editBtn.style.background=''; editBtn.style.color='';
+    saveBtn.style.display = 'none';
+    inputEditMode[itemId] = false;
+  }
+}
+function saveInput(itemId) {
+  const table = document.getElementById('inputTable_' + itemId);
+  const editBtn = document.getElementById('inputEditBtn_' + itemId);
+  const saveBtn = document.getElementById('inputSaveBtn_' + itemId);
+  const cells = table.querySelectorAll('tbody tr td:nth-child(2)');
+  const fdData = FD_DATA[itemId];
+  const descMap = {};
+  cells.forEach((cell, i) => {
+    const input = cell.querySelector('input');
+    const val = input ? input.value.trim() : (fdData?.input_params[i]?.desc || '');
+    if (fdData?.input_params[i] !== undefined) fdData.input_params[i].desc = val;
+    descMap[i] = val;
+    cell.textContent = val;
+  });
+  editBtn.textContent = '✏️ 편집'; editBtn.style.background=''; editBtn.style.color='';
+  saveBtn.style.display = 'none';
+  inputEditMode[itemId] = false;
+  try {
+    const s = JSON.parse(localStorage.getItem('fd_input_desc') || '{}');
+    s[itemId] = descMap; localStorage.setItem('fd_input_desc', JSON.stringify(s));
+  } catch(e) {}
+}
+
+// ──────────────────────────────────────────────
+// FIELD DESC 테이블 편집/저장
+// ──────────────────────────────────────────────
+let fieldEditMode = {};
+
+function toggleFieldEdit(itemId) {
+  const isEditing = fieldEditMode[itemId];
+  const table = document.getElementById('fieldTable_' + itemId);
+  const editBtn = document.getElementById('fieldEditBtn_' + itemId);
+  const saveBtn = document.getElementById('fieldSaveBtn_' + itemId);
+  const cells = table.querySelectorAll('tbody tr td:nth-child(2)');
+  const fdData = FD_DATA[itemId];
+
+  if (!isEditing) {
+    // 편집 모드 진입 - 각 셀을 input으로 전환
+    cells.forEach((cell, i) => {
+      const val = fdData?.field_desc[i]?.desc || '';
+      cell.innerHTML = `<input type="text" value="${val.replace(/"/g,'&quot;')}"
+        style="width:100%;box-sizing:border-box;padding:4px 8px;border:1px solid #3b82f6;border-radius:4px;font-size:13px;font-family:inherit;outline:none;" />`;
+    });
+    editBtn.textContent = '✖ 취소';
+    editBtn.style.background = '#fee2e2';
+    editBtn.style.color = '#dc2626';
+    saveBtn.style.display = 'inline-flex';
+    fieldEditMode[itemId] = true;
+  } else {
+    // 취소 - 원래 텍스트로 복원
+    cells.forEach((cell, i) => {
+      const val = fdData?.field_desc[i]?.desc || '';
+      cell.innerHTML = val ? val : '';
+    });
+    editBtn.textContent = '✏️ 편집';
+    editBtn.style.background = '';
+    editBtn.style.color = '';
+    saveBtn.style.display = 'none';
+    fieldEditMode[itemId] = false;
+  }
+}
+
+function saveFieldDesc(itemId) {
+  const table = document.getElementById('fieldTable_' + itemId);
+  const editBtn = document.getElementById('fieldEditBtn_' + itemId);
+  const saveBtn = document.getElementById('fieldSaveBtn_' + itemId);
+  const cells = table.querySelectorAll('tbody tr td:nth-child(2)');
+  const fdData = FD_DATA[itemId];
+
+  const descMap = {};
+  cells.forEach((cell, i) => {
+    const input = cell.querySelector('input');
+    const val = input ? input.value.trim() : (fdData?.field_desc[i]?.desc || '');
+    if (fdData && fdData.field_desc[i] !== undefined) {
+      fdData.field_desc[i].desc = val;
+    }
+    descMap[i] = val;
+    cell.textContent = val;
+  });
+
+  // localStorage에 저장
+  try {
+    const stored = JSON.parse(localStorage.getItem('fd_field_desc') || '{}');
+    stored[itemId] = descMap;
+    localStorage.setItem('fd_field_desc', JSON.stringify(stored));
+  } catch(e) {}
+
+  editBtn.textContent = '✏️ 편집';
+  editBtn.style.background = '';
+  editBtn.style.color = '';
+  saveBtn.style.display = 'none';
+  fieldEditMode[itemId] = false;
+}
+
+// ──────────────────────────────────────────────
+// EXTRA SECTION (컨커넌트 메뉴 공통)
+// ──────────────────────────────────────────────
+const extraFieldMap = {
+  menuScreen:   { ta: 'ta_menuScreen',   text: 'text_menuScreen',   edit: 'edit_menuScreen',   save: 'saveBtn_menuScreen',   dataKey: 'menu_screen' },
+  contentDesc:  { ta: 'ta_contentDesc',  text: 'text_contentDesc',  edit: 'edit_contentDesc',  save: 'saveBtn_contentDesc',  dataKey: 'content_desc' },
+  programLogic: { ta: 'ta_programLogic', text: 'text_programLogic', edit: 'edit_programLogic', save: 'saveBtn_programLogic', dataKey: 'program_logic' },
+};
+
+function toggleEdit(key) {
+  const f = extraFieldMap[key];
+  const editEl = document.getElementById(f.edit);
+  const saveBtn = document.getElementById(f.save);
+  const isHidden = editEl.style.display === 'none';
+  editEl.style.display = isHidden ? 'block' : 'none';
+  saveBtn.style.display = isHidden ? 'inline-flex' : 'none';
+}
+
+function saveExtra(key) {
+  const f = extraFieldMap[key];
+  const val = document.getElementById(f.ta).value;
+  const curItem = menuItems.find(m => m.id === activeId);
+  const fdData = FD_DATA[activeId] || FD_DATA[curItem?.label];
+  if (fdData) fdData[f.dataKey] = val;
+  const textEl = document.getElementById(f.text);
+  if (textEl) textEl.innerHTML = val ? val.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>') : '<span style="color:#94a3b8">내용을 입력하세요.</span>';
+  document.getElementById(f.edit).style.display = 'none';
+  document.getElementById(f.save).style.display = 'none';
+
+  // localStorage에 저장 (이미지 제외)
+  if (f.dataKey !== 'menu_screen') {
+    try {
+      const stored = JSON.parse(localStorage.getItem('fd_extra') || '{}');
+      if (!stored[activeId]) stored[activeId] = {};
+      stored[activeId][f.dataKey] = val;
+      localStorage.setItem('fd_extra', JSON.stringify(stored));
+    } catch(e) { console.warn('localStorage 저장 실패:', e); }
+  }
+}
+
+function handleImgUpload(key, input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('menuScreenImg');
+    const ph = document.getElementById('menuScreenImg_placeholder');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    if (ph) ph.style.display = 'none';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+// ──────────────────────────────────────────────
+// RESIZE HANDLE
+// ──────────────────────────────────────────────
+const handle = document.getElementById('resizeHandle');
+const sidebar = document.getElementById('sidebar');
+let isResizing = false;
+handle.addEventListener('mousedown', e => {
+  isResizing = true; e.preventDefault();
+  document.body.style.cursor = 'col-resize';
+  document.body.style.userSelect = 'none';
+});
+document.addEventListener('mousemove', e => {
+  if (!isResizing) return;
+  const w = Math.max(180, Math.min(420, e.clientX));
+  sidebar.style.width = w + 'px';
+  document.documentElement.style.setProperty('--sidebar-w', w + 'px');
+});
+document.addEventListener('mouseup', () => {
+  isResizing = false;
+  document.body.style.cursor = '';
+  document.body.style.userSelect = '';
+});
+
+// modal click outside
+document.getElementById('addModal').addEventListener('click', function(e) {
+  if (e.target === this) closeAddModal();
+});
+
+// ── INIT ──
+// localStorage에서 저장된 데이터 복원
+try {
+  // 1. 개요 복원
+  const storedOverview = JSON.parse(localStorage.getItem('fd_overview') || '{}');
+  Object.entries(storedOverview).forEach(([itemId, val]) => {
+    if (FD_DATA[itemId]) FD_DATA[itemId].overview = val;
+  });
+
+  // 2. 변경이력 복원
+  const storedHistory = JSON.parse(localStorage.getItem('fd_history') || '{}');
+  Object.entries(storedHistory).forEach(([itemId, histArr]) => {
+    if (FD_DATA[itemId]) {
+      histArr.forEach((row, i) => {
+        if (FD_DATA[itemId].history[i]) Object.assign(FD_DATA[itemId].history[i], row);
+      });
+    }
+  });
+
+  // 3. Input Parameter 복원
+  const storedInput = JSON.parse(localStorage.getItem('fd_input_desc') || '{}');
+  Object.entries(storedInput).forEach(([itemId, descMap]) => {
+    if (FD_DATA[itemId]) {
+      Object.entries(descMap).forEach(([i, val]) => {
+        const idx = Number(i);
+        if (FD_DATA[itemId].input_params[idx] !== undefined) FD_DATA[itemId].input_params[idx].desc = val;
+      });
+    }
+  });
+
+  // 4. field_desc 복원
+  const storedDesc = JSON.parse(localStorage.getItem('fd_field_desc') || '{}');
+  Object.entries(storedDesc).forEach(([itemId, descMap]) => {
+    if (FD_DATA[itemId]) {
+      Object.entries(descMap).forEach(([i, val]) => {
+        const idx = Number(i);
+        if (FD_DATA[itemId].field_desc[idx] !== undefined) FD_DATA[itemId].field_desc[idx].desc = val;
+      });
+    }
+  });
+
+  // 5. 처리 Logic 복원 (텍스트 타입만)
+  const storedLogic = JSON.parse(localStorage.getItem('fd_logic') || '{}');
+  Object.entries(storedLogic).forEach(([itemId, val]) => {
+    if (FD_DATA[itemId]) {
+      const nonTextLogic = FD_DATA[itemId].logic.filter(l => l.type === 'table' || l.type === 'detail_table');
+      const newTextLogic = val ? val.split('\n').map(line => {
+        if (line.startsWith('■')) return { type: 'head', text: line };
+        if (line.startsWith('--') || line.startsWith('SELECT') || line.startsWith('FROM') || line.startsWith('WHERE')) return { type: 'code', text: line };
+        return { type: 'normal', text: line };
+      }) : [];
+      FD_DATA[itemId].logic = [...nonTextLogic, ...newTextLogic];
+    }
+  });
+
+  // extra 섹션 복원 (program_logic, content_desc 등 - 이미지 제외)
+  const storedExtra = JSON.parse(localStorage.getItem('fd_extra') || '{}');
+  Object.entries(storedExtra).forEach(([itemId, dataMap]) => {
+    if (FD_DATA[itemId]) {
+      Object.entries(dataMap).forEach(([dataKey, val]) => {
+        if (dataKey !== 'menu_screen') FD_DATA[itemId][dataKey] = val;
+      });
+    }
+  });
+} catch(e) { console.warn('localStorage 복원 실패:', e); }
+
+renderSidebar();
+renderContent();
+</script>
+</body>
+</html>
